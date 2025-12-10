@@ -169,7 +169,11 @@
         
         /* Chat: garantir que cabe no ecrã e input fica fixo ao fundo */
         .chat-window { height: calc(var(--vh) - 120px); display: flex; flex-direction: column; }
-        .chat-messages { flex: 1; overflow-y: auto; }
+        .chat-messages { 
+            flex: 1; 
+            overflow-y: auto; 
+            scroll-behavior: smooth;
+        }
         .chat-input-container { position: sticky; bottom: 0; background: var(--color-surface); }
         
         /* Modais: não passar da viewport e permitir scroll interno */
@@ -334,7 +338,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: #ffffff;
+            background: var(--color-bg-primary);
             z-index: -1;
         }
         
@@ -426,6 +430,9 @@
             justify-content: space-around;
             cursor: pointer;
             padding: 4px;
+            background: none;
+            border: none;
+            outline: none;
         }
         
         .burger-icon span {
@@ -433,11 +440,27 @@
             height: 3px;
             background: var(--color-text-primary);
             border-radius: 2px;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        /* Garantir contraste adequado do burger icon */
+        .burger-icon:hover span {
+            background: var(--color-blue-dark);
+        }
+        
+        .burger-icon.active span {
+            background: var(--color-blue-dark);
+        }
+        
+        .burger-icon:focus {
+            outline: 2px solid var(--color-blue-dark);
+            outline-offset: 2px;
+            border-radius: 4px;
         }
         
         .burger-icon.active span:nth-child(1) {
             transform: rotate(45deg) translate(8px, 8px);
+            background: var(--color-blue-dark);
         }
         
         .burger-icon.active span:nth-child(2) {
@@ -446,6 +469,17 @@
         
         .burger-icon.active span:nth-child(3) {
             transform: rotate(-45deg) translate(8px, -8px);
+            background: var(--color-blue-dark);
+        }
+        
+        /* Modo escuro: garantir que o burger icon seja visível */
+        .dark-mode .burger-icon span {
+            background: var(--color-text-primary);
+        }
+        
+        .dark-mode .burger-icon:hover span,
+        .dark-mode .burger-icon.active span {
+            background: var(--color-blue-dark);
         }
         
         /* Sidebar */
@@ -540,6 +574,12 @@
             cursor: pointer;
             transition: all 0.2s ease;
             color: var(--color-text-primary);
+            user-select: none;
+        }
+        
+        .sidebar-menu-item:focus {
+            outline: 2px solid var(--color-blue-dark);
+            outline-offset: 2px;
         }
         
         .sidebar-menu-item:hover {
@@ -722,12 +762,13 @@
         }
         
         .auth-card {
-            background: white;
+            background: var(--color-surface);
             border-radius: 20px;
             padding: 2rem;
             width: 100%;
             max-width: 400px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            color: var(--color-text-primary);
             animation: slideUp 0.5s ease;
         }
         
@@ -1260,7 +1301,7 @@
         /* Text Utilities */
         .text-center { text-align: center; }
         .text-bold { font-weight: 600; }
-        .text-grey { color: var(--color-dark-grey); }
+        .text-grey { color: var(--color-text-secondary); }
         .text-small { font-size: 0.9rem; }
         .mb-1 { margin-bottom: 0.5rem; }
         .mb-2 { margin-bottom: 1rem; }
@@ -1438,6 +1479,8 @@
             animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             backdrop-filter: blur(4px);
             -webkit-backdrop-filter: blur(4px);
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
         
         @keyframes fadeIn {
@@ -1459,9 +1502,13 @@
             width: 100%;
             max-height: 90vh;
             overflow-y: auto;
+            overflow-x: hidden;
             box-shadow: var(--shadow-xl);
             border: 1px solid var(--color-border-light);
             animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            -webkit-overflow-scrolling: touch;
+            position: relative;
+            margin: auto;
         }
         
         @keyframes slideUp {
@@ -1479,12 +1526,15 @@
             .modal {
                 padding: var(--space-2);
                 align-items: flex-end;
+                overflow-y: auto;
             }
             
             .modal-content {
                 max-height: 95vh;
                 width: 100%;
                 border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
             }
         }
         
@@ -1608,7 +1658,7 @@
             flex: 1;
             padding: 1rem;
             overflow-y: auto;
-            background: #f8f9fa;
+            background: var(--color-bg-secondary);
         }
         
         .message {
@@ -1625,7 +1675,8 @@
             max-width: 70%;
             padding: 0.75rem 1rem;
             border-radius: 15px;
-            background: white;
+            background: var(--color-surface);
+            color: var(--color-text-primary);
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
         
@@ -1636,14 +1687,14 @@
         
         .message-time {
             font-size: 0.7rem;
-            color: var(--color-dark-grey);
+            color: var(--color-text-muted);
             margin-top: 0.25rem;
         }
         
         .chat-input-container {
             display: flex;
             padding: 1rem;
-            background: white;
+            background: var(--color-surface);
             border-radius: 0 0 15px 15px;
             gap: 0.5rem;
         }
@@ -1722,7 +1773,7 @@
             align-items: center;
             justify-content: center;
             font-size: 2rem;
-            color: var(--color-dark-grey);
+            color: var(--color-text-muted);
         }
         
         .image-upload-preview {
@@ -1802,7 +1853,8 @@
         }
         
         .marketplace-product-card {
-            background: white;
+            background: var(--color-surface);
+            color: var(--color-text-primary);
             border-radius: 15px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             overflow: hidden;
@@ -1894,8 +1946,9 @@
             top: 100%;
             left: 0;
             right: 0;
-            background: white;
-            border: 1px solid var(--color-light-grey);
+            background: var(--color-surface);
+            color: var(--color-text-primary);
+            border: 1px solid var(--color-border);
             border-radius: 10px;
             max-height: 200px;
             overflow-y: auto;
@@ -1915,7 +1968,7 @@
         }
         
         .school-option:hover {
-            background: var(--color-light-grey);
+            background: var(--color-surface-hover);
         }
         
         .school-option.selected {
@@ -1938,21 +1991,22 @@
             top: 0.75rem;
             left: 1rem;
             font-size: 0.9rem;
-            color: var(--color-dark-grey);
+            color: var(--color-text-secondary);
             transition: all 0.3s ease;
             pointer-events: none;
-            background: white;
+            background: var(--color-surface);
             padding: 0 0.25rem;
         }
         
         .input-field-enhanced {
             width: 100%;
             padding: 1rem;
-            border: 2px solid var(--color-light-grey);
+            border: 2px solid var(--color-border);
             border-radius: 10px;
             font-size: 1rem;
             transition: all 0.3s ease;
-            background: white;
+            background: var(--color-surface);
+            color: var(--color-text-primary);
         }
         
         .input-field-enhanced:focus {
@@ -1972,51 +2026,212 @@
         /* ========== ENHANCED FEATURES STYLES ========== */
         .search-result-item {
             padding: 0.75rem;
-            border-bottom: 1px solid var(--color-light-grey);
+            border-bottom: 1px solid var(--color-border);
             cursor: pointer;
             transition: background 0.3s ease;
+            background: var(--color-surface);
+            color: var(--color-text-primary);
         }
         
         .search-result-item:hover {
-            background: var(--color-light-grey);
+            background: var(--color-surface-hover);
         }
         
         .search-result-item:last-child {
             border-bottom: none;
         }
         
-        /* Dark mode styles */
+        /* Dark mode styles - usando variáveis CSS */
         .dark-mode {
-            background: #1a1a1a;
-            color: #e0e0e0;
+            --color-bg-primary: #1a1a1a;
+            --color-bg-secondary: #141414;
+            --color-bg-tertiary: #2a2a2a;
+            --color-surface: #1e1e1e;
+            --color-surface-hover: #2a2a2a;
+            --color-text-primary: #ffffff;
+            --color-text-secondary: #a1a1aa;
+            --color-text-muted: #71717a;
+            --color-border: #3f3f46;
+            --color-border-light: #27272a;
+            --color-divider: #18181b;
+        }
+        
+        .dark-mode,
+        .dark-mode body {
+            background: var(--color-bg-primary);
+            color: var(--color-text-primary);
         }
         
         .dark-mode .app-header,
         .dark-mode .bottom-nav {
-            background: #2d2d2d;
-            color: #e0e0e0;
+            background: var(--color-surface);
+            color: var(--color-text-primary);
+            border-color: var(--color-border);
         }
         
         .dark-mode .card,
-        .dark-mode .marketplace-product-card {
-            background: #2d2d2d;
-            color: #e0e0e0;
+        .dark-mode .marketplace-product-card,
+        .dark-mode .dashboard-card,
+        .dark-mode .chat-item {
+            background: var(--color-surface);
+            color: var(--color-text-primary);
+            border-color: var(--color-border);
+        }
+        
+        .dark-mode .card:hover,
+        .dark-mode .marketplace-product-card:hover {
+            background: var(--color-surface-hover);
         }
         
         .dark-mode .input-field,
-        .dark-mode .select-field {
-            background: #2d2d2d;
-            color: #e0e0e0;
-            border-color: #404040;
+        .dark-mode .select-field,
+        .dark-mode .search-input,
+        .dark-mode textarea {
+            background: var(--color-surface);
+            color: var(--color-text-primary);
+            border-color: var(--color-border);
+        }
+        
+        .dark-mode .input-field:focus,
+        .dark-mode .select-field:focus,
+        .dark-mode .search-input:focus {
+            border-color: var(--color-blue-dark);
+            background: var(--color-surface-hover);
         }
         
         .dark-mode .modal-content {
-            background: #2d2d2d;
-            color: #e0e0e0;
+            background: var(--color-surface);
+            color: var(--color-text-primary);
+            border-color: var(--color-border);
+        }
+        
+        .dark-mode .modal-overlay {
+            background: rgba(0, 0, 0, 0.8);
         }
         
         .dark-mode .text-grey {
-            color: #b0b0b0 !important;
+            color: var(--color-text-secondary) !important;
+        }
+        
+        .dark-mode .text-muted {
+            color: var(--color-text-muted) !important;
+        }
+        
+        .dark-mode .sidebar {
+            background: var(--color-surface);
+            border-color: var(--color-border);
+        }
+        
+        .dark-mode .sidebar-overlay {
+            background: rgba(0, 0, 0, 0.6);
+        }
+        
+        .dark-mode .sidebar-menu-item {
+            color: var(--color-text-primary);
+        }
+        
+        .dark-mode .sidebar-menu-item:hover {
+            background: var(--color-surface-hover);
+        }
+        
+        .dark-mode .sidebar-menu-item.active {
+            background: var(--color-blue-dark);
+            color: #ffffff;
+        }
+        
+        .dark-mode .page-header {
+            color: var(--color-text-primary);
+        }
+        
+        .dark-mode .dashboard-geometric-bg {
+            background: var(--color-bg-primary);
+        }
+        
+        .dark-mode .chat-messages {
+            background: var(--color-bg-secondary);
+        }
+        
+        .dark-mode .chat-input-container {
+            background: var(--color-surface);
+            border-color: var(--color-border);
+        }
+        
+        .dark-mode .marketplace-filters {
+            background: var(--color-surface) !important;
+            border-color: var(--color-border);
+        }
+        
+        .dark-mode .btn-grey {
+            background: var(--color-bg-tertiary);
+            color: var(--color-text-primary);
+            border-color: var(--color-border);
+        }
+        
+        .dark-mode .btn-grey:hover {
+            background: var(--color-surface-hover);
+        }
+        
+        .dark-mode .search-result-item {
+            background: var(--color-surface);
+            color: var(--color-text-primary);
+            border-color: var(--color-border);
+        }
+        
+        .dark-mode .search-result-item:hover {
+            background: var(--color-surface-hover);
+        }
+        
+        .dark-mode .message-bubble {
+            background: var(--color-surface);
+            color: var(--color-text-primary);
+        }
+        
+        .dark-mode .message.own .message-bubble {
+            background: var(--color-blue-dark);
+            color: #ffffff;
+        }
+        
+        .dark-mode .message-time {
+            color: var(--color-text-muted);
+        }
+        
+        /* Typing indicator base styles */
+        .typing-indicator {
+            background: var(--color-surface);
+            padding: 0.75rem 1rem;
+            border-radius: 15px;
+            display: inline-flex;
+            gap: 0.25rem;
+            margin-bottom: 1rem;
+        }
+        
+        .typing-indicator span {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--color-text-muted);
+            animation: typing 1.4s infinite;
+        }
+        
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); opacity: 0.7; }
+            30% { transform: translateY(-10px); opacity: 1; }
+        }
+        
+        .dark-mode .typing-indicator {
+            background: var(--color-surface);
+        }
+        
+        .dark-mode .typing-indicator span {
+            background: var(--color-text-muted);
         }
         
         /* Enhanced animations */
@@ -2201,8 +2416,12 @@
         }
         
         .school-option:hover {
-            background: linear-gradient(90deg, rgba(10, 124, 195, 0.1), rgba(10, 124, 195, 0.05));
+            background: var(--color-surface-hover);
             padding-left: 1.5rem;
+        }
+        
+        .dark-mode .school-option:hover {
+            background: var(--color-surface-hover);
         }
         
         .school-option.selected {
@@ -2552,12 +2771,12 @@
         }
         
         .achievement.locked .achievement-title {
-            color: var(--color-dark-grey);
+            color: var(--color-text-secondary);
         }
         
         .achievement-desc {
             font-size: 0.8rem;
-            color: var(--color-dark-grey);
+            color: var(--color-text-secondary);
         }
         
         .achievement.unlocked:hover {
@@ -2569,12 +2788,16 @@
 <body>
     <div class="app">
         <div class="app-header hidden" id="appHeader">
-            <div class="burger-icon" id="burgerIcon" onclick="toggleSidebar()">
+            <button class="burger-icon" id="burgerIcon" onclick="toggleSidebar()" aria-label="Abrir menu lateral" type="button">
                 <span></span>
                 <span></span>
                 <span></span>
-            </div>
+            </button>
             <div class="logo-container"></div>
+            <div id="cartIcon" style="position: relative; cursor: pointer; padding: 0.5rem;" onclick="navigateTo('cart')" title="Carrinho de Compras" aria-label="Carrinho de compras">
+                <span style="font-size: 1.5rem;">🛒</span>
+                <span id="cartBadge" style="position: absolute; top: 2px; right: 2px; background: var(--color-red); color: white; border-radius: 50%; width: 20px; height: 20px; display: none; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: bold;">0</span>
+            </div>
         </div>
         
         <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
@@ -2584,9 +2807,9 @@
                 <div class="sidebar-logo" id="sidebarLogo">
                     <!-- Logo will be loaded here -->
                 </div>
-                <div class="sidebar-settings" onclick="navigateTo('profile'); toggleSidebar();" title="Definições">
+                <button class="sidebar-settings" onclick="navigateTo('profile');" title="Definições" aria-label="Abrir definições" type="button">
                     ⚙️
-                </div>
+                </button>
             </div>
             <div class="sidebar-menu" id="sidebarMenu">
                 <!-- Menu items will be dynamically rendered here -->
@@ -2906,6 +3129,313 @@
         
         // === UTILITY FUNCTIONS ===
         
+        // === LOCALSTORAGE DATA MANAGEMENT ===
+        
+        // Initialize data from localStorage or use mock data
+        function initializeData() {
+            // Load products
+            const savedProducts = localStorage.getItem('nexus_products');
+            if (savedProducts) {
+                const products = JSON.parse(savedProducts);
+                mockData.products = [...mockData.products, ...products.filter(p => !mockData.products.find(mp => mp.id === p.id))];
+            }
+            
+            // Load explanations
+            const savedExplanations = localStorage.getItem('nexus_explanations');
+            if (savedExplanations) {
+                const explanations = JSON.parse(savedExplanations);
+                mockData.explanations = [...mockData.explanations, ...explanations.filter(e => !mockData.explanations.find(me => me.id === e.id))];
+            }
+            
+            // Load agenda items
+            const savedAgenda = localStorage.getItem('nexus_agenda');
+            if (savedAgenda) {
+                mockData.agendaItems = JSON.parse(savedAgenda);
+            }
+            
+            // Load chats
+            const savedChats = localStorage.getItem('nexus_chats');
+            if (savedChats) {
+                const chats = JSON.parse(savedChats);
+                mockData.chats = [...mockData.chats, ...chats.filter(c => !mockData.chats.find(mc => mc.id === c.id))];
+            }
+            
+            // Load favorites
+            const savedFavorites = localStorage.getItem('nexus_favorites');
+            if (savedFavorites) {
+                window.userFavorites = JSON.parse(savedFavorites);
+            } else {
+                window.userFavorites = { products: [], explanations: [] };
+            }
+            
+            // Load user history
+            const savedHistory = localStorage.getItem('nexus_history');
+            if (savedHistory) {
+                window.userHistory = JSON.parse(savedHistory);
+            } else {
+                window.userHistory = { purchases: [], sales: [], explanations: [] };
+            }
+            
+            // Load user points and achievements
+            const savedPoints = localStorage.getItem('nexus_user_points');
+            if (savedPoints) {
+                window.userPoints = JSON.parse(savedPoints);
+            } else {
+                window.userPoints = { points: 0, achievements: [] };
+            }
+            
+            // Load search history
+            const savedSearchHistory = localStorage.getItem('nexus_search_history');
+            if (savedSearchHistory) {
+                window.searchHistory = JSON.parse(savedSearchHistory);
+            } else {
+                window.searchHistory = [];
+            }
+            
+            // Load shopping cart
+            const savedCart = localStorage.getItem('nexus_cart');
+            if (savedCart) {
+                window.shoppingCart = JSON.parse(savedCart);
+            } else {
+                window.shoppingCart = { products: [], explanations: [] };
+            }
+        }
+        
+        // Save products to localStorage
+        function saveProducts() {
+            localStorage.setItem('nexus_products', JSON.stringify(mockData.products));
+        }
+        
+        // Save explanations to localStorage
+        function saveExplanations() {
+            localStorage.setItem('nexus_explanations', JSON.stringify(mockData.explanations));
+        }
+        
+        // Save agenda to localStorage
+        function saveAgenda() {
+            localStorage.setItem('nexus_agenda', JSON.stringify(mockData.agendaItems));
+        }
+        
+        // Save chats to localStorage
+        function saveChats() {
+            localStorage.setItem('nexus_chats', JSON.stringify(mockData.chats));
+        }
+        
+        // Save favorites to localStorage
+        function saveFavorites() {
+            localStorage.setItem('nexus_favorites', JSON.stringify(window.userFavorites));
+        }
+        
+        // Save user history to localStorage
+        function saveHistory() {
+            localStorage.setItem('nexus_history', JSON.stringify(window.userHistory));
+        }
+        
+        // Save user points to localStorage
+        function savePoints() {
+            localStorage.setItem('nexus_user_points', JSON.stringify(window.userPoints));
+        }
+        
+        // Save shopping cart to localStorage
+        function saveCart() {
+            localStorage.setItem('nexus_cart', JSON.stringify(window.shoppingCart));
+            updateCartIcon();
+        }
+        
+        // Get cart item count
+        function getCartItemCount() {
+            if (!window.shoppingCart) return 0;
+            return (window.shoppingCart.products?.length || 0) + (window.shoppingCart.explanations?.length || 0);
+        }
+        
+        // Update cart icon badge
+        function updateCartIcon() {
+            const cartIcon = document.getElementById('cartIcon');
+            const cartBadge = document.getElementById('cartBadge');
+            const count = getCartItemCount();
+            
+            if (cartBadge) {
+                if (count > 0) {
+                    cartBadge.textContent = count > 99 ? '99+' : count;
+                    cartBadge.style.display = 'flex';
+                } else {
+                    cartBadge.style.display = 'none';
+                }
+            }
+        }
+        
+        // Add product to cart
+        function addProductToCart(productId) {
+            const product = mockData.products.find(p => p.id === productId);
+            if (!product) return;
+            
+            if (!window.shoppingCart) window.shoppingCart = { products: [], explanations: [] };
+            if (!window.shoppingCart.products) window.shoppingCart.products = [];
+            
+            // Check if already in cart
+            if (window.shoppingCart.products.find(p => p.id === productId)) {
+                showNotification('Produto já no carrinho', 'Este produto já está no seu carrinho!', 'info');
+                return;
+            }
+            
+            window.shoppingCart.products.push({
+                id: product.id,
+                name: product.name,
+                price: product.price,
+                seller: product.seller,
+                image: product.image,
+                condition: product.condition
+            });
+            
+            saveCart();
+            showNotification('Adicionado ao Carrinho', `${product.name} foi adicionado ao carrinho!`, 'success');
+        }
+        
+        // Add explanation to cart
+        function addExplanationToCart(explanationId) {
+            const explanation = mockData.explanations.find(e => e.id === explanationId);
+            if (!explanation) return;
+            
+            if (!window.shoppingCart) window.shoppingCart = { products: [], explanations: [] };
+            if (!window.shoppingCart.explanations) window.shoppingCart.explanations = [];
+            
+            // Check if already in cart
+            if (window.shoppingCart.explanations.find(e => e.id === explanationId)) {
+                showNotification('Explicação já no carrinho', 'Esta explicação já está no seu carrinho!', 'info');
+                return;
+            }
+            
+            window.shoppingCart.explanations.push({
+                id: explanation.id,
+                subject: explanation.subject,
+                price: explanation.price,
+                tutor: explanation.tutor,
+                level: explanation.level
+            });
+            
+            saveCart();
+            showNotification('Adicionado ao Carrinho', `Explicação de ${explanation.subject} foi adicionada ao carrinho!`, 'success');
+        }
+        
+        // Remove product from cart
+        function removeProductFromCart(productId) {
+            if (!window.shoppingCart || !window.shoppingCart.products) return;
+            
+            const index = window.shoppingCart.products.findIndex(p => p.id === productId);
+            if (index > -1) {
+                window.shoppingCart.products.splice(index, 1);
+                saveCart();
+                if (currentPage === 'cart') {
+                    renderPage();
+                }
+            }
+        }
+        
+        // Remove explanation from cart
+        function removeExplanationFromCart(explanationId) {
+            if (!window.shoppingCart || !window.shoppingCart.explanations) return;
+            
+            const index = window.shoppingCart.explanations.findIndex(e => e.id === explanationId);
+            if (index > -1) {
+                window.shoppingCart.explanations.splice(index, 1);
+                saveCart();
+                if (currentPage === 'cart') {
+                    renderPage();
+                }
+            }
+        }
+        
+        // Calculate cart total
+        function calculateCartTotal() {
+            if (!window.shoppingCart) return { products: 0, explanations: 0, total: 0 };
+            
+            let productsTotal = 0;
+            let explanationsTotal = 0;
+            
+            window.shoppingCart.products?.forEach(product => {
+                // Extract price - handles formats like "25€", "25,50€", "25.50€"
+                const priceStr = product.price.toString().replace(/[^\d,.]/g, '').replace(',', '.');
+                const price = parseFloat(priceStr);
+                if (!isNaN(price)) productsTotal += price;
+            });
+            
+            window.shoppingCart.explanations?.forEach(explanation => {
+                // Extract price - handles formats like "15€/hora", "15,50€/hora"
+                const priceStr = explanation.price.toString().replace(/[^\d,.]/g, '').replace(',', '.');
+                const price = parseFloat(priceStr);
+                if (!isNaN(price)) explanationsTotal += price;
+            });
+            
+            return {
+                products: productsTotal,
+                explanations: explanationsTotal,
+                total: productsTotal + explanationsTotal
+            };
+        }
+        
+        // Add points to user
+        function addPoints(amount, reason) {
+            if (!window.userPoints) window.userPoints = { points: 0, achievements: [] };
+            window.userPoints.points += amount;
+            savePoints();
+            
+            // Check for achievements
+            checkAchievements();
+            
+            // Show notification
+            if (reason) {
+                showNotification('Pontos Ganhos', `Ganhou ${amount} pontos! ${reason}`, 'success');
+            }
+        }
+        
+        // Check and unlock achievements
+        function checkAchievements() {
+            if (!window.userPoints) window.userPoints = { points: 0, achievements: [] };
+            
+            const achievements = [
+                { id: 'first_product', name: 'Primeiro Produto', desc: 'Publicou o primeiro produto', points: 50, condition: () => window.userHistory.sales.length >= 1 },
+                { id: 'first_explanation', name: 'Primeira Explicação', desc: 'Ofereceu a primeira explicação', points: 50, condition: () => window.userHistory.explanations.length >= 1 },
+                { id: 'first_sale', name: 'Primeira Venda', desc: 'Vendeu o primeiro produto', points: 100, condition: () => window.userHistory.sales.filter(s => s.sold).length >= 1 },
+                { id: 'social_butterfly', name: 'Borboleta Social', desc: 'Enviou 50 mensagens', points: 75, condition: () => {
+                    let totalMessages = 0;
+                    mockData.chats.forEach(chat => {
+                        totalMessages += chat.messages.filter(m => m.own).length;
+                    });
+                    return totalMessages >= 50;
+                }},
+                { id: 'organizer', name: 'Organizador', desc: 'Criou 10 eventos na agenda', points: 100, condition: () => mockData.agendaItems.length >= 10 },
+                { id: 'helper', name: 'Ajudante', desc: 'Favoritou 5 itens', points: 50, condition: () => (window.userFavorites?.products?.length || 0) + (window.userFavorites?.explanations?.length || 0) >= 5 }
+            ];
+            
+            achievements.forEach(achievement => {
+                if (!window.userPoints.achievements.find(a => a.id === achievement.id)) {
+                    if (achievement.condition()) {
+                        window.userPoints.achievements.push({
+                            id: achievement.id,
+                            name: achievement.name,
+                            desc: achievement.desc,
+                            unlockedAt: new Date().toISOString()
+                        });
+                        addPoints(achievement.points, `Conquista desbloqueada: ${achievement.name}!`);
+                        savePoints();
+                    }
+                }
+            });
+        }
+        
+        // Debounce function for search inputs
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+        
         // Back navigation function
         function goBack() {
             const previousPage = localStorage.getItem('nexus_previous_page') || 'dashboard';
@@ -3023,6 +3553,16 @@
         function performSearch(query) {
             if (!query.trim()) return;
             
+            // Add to search history
+            if (!window.searchHistory) window.searchHistory = [];
+            const trimmedQuery = query.trim();
+            if (!window.searchHistory.includes(trimmedQuery)) {
+                window.searchHistory.unshift(trimmedQuery);
+                // Keep only last 10 searches
+                window.searchHistory = window.searchHistory.slice(0, 10);
+                localStorage.setItem('nexus_search_history', JSON.stringify(window.searchHistory));
+            }
+            
             const results = [];
             
             // Enhanced search with better scoring
@@ -3133,8 +3673,31 @@
         function renderSearchPage() {
             const results = window.searchResults || [];
             const query = window.searchQuery || '';
+            const searchHistory = window.searchHistory || [];
             
-            if (results.length === 0) {
+            let historySection = '';
+            if (searchHistory.length > 0 && !query) {
+                historySection = `
+                    <div class="card">
+                        <h3 class="text-bold mb-2">🕐 Pesquisas Recentes</h3>
+                        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                            ${searchHistory.slice(0, 5).map(term => `
+                                <div style="padding: 0.75rem; background: var(--color-bg-secondary); border-radius: 8px; cursor: pointer; display: flex; justify-content: space-between; align-items: center;" 
+                                     onclick="document.getElementById('globalSearch').value='${term}'; performSearch('${term}');">
+                                    <span>🔍 ${term}</span>
+                                    <button class="btn btn-grey" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;" 
+                                            onclick="event.stopPropagation(); removeSearchHistory('${term}');">✖️</button>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <button class="btn btn-grey" style="width: 100%; margin-top: 0.5rem;" onclick="clearSearchHistory()">
+                            🗑️ Limpar Histórico
+                        </button>
+                    </div>
+                `;
+            }
+            
+            if (results.length === 0 && query) {
                 return `
                     <h2 class="text-center mb-3">Pesquisa</h2>
                     
@@ -3146,10 +3709,34 @@
                         </div>
                     </div>
                     
+                    ${historySection}
+                    
                     <div class="card text-center">
-                        <div style="font-size: 3rem; margin-bottom: 1rem;">🔍</div>
-                        <h3>Nenhum resultado encontrado</h3>
-                        <p class="text-grey">Tente pesquisar com termos diferentes.</p>
+                        <div style="font-size: 4rem; margin-bottom: 1rem;">🔍</div>
+                        <h3 class="text-bold mb-1">Nenhum resultado encontrado</h3>
+                        <p class="text-grey mb-2">Tente pesquisar com termos diferentes ou verifique a ortografia.</p>
+                    </div>
+                `;
+            }
+            
+            if (results.length === 0 && !query) {
+                return `
+                    <h2 class="text-center mb-3">Pesquisa</h2>
+                    
+                    <div class="search-container">
+                        <div style="position: relative;">
+                            <input type="text" class="search-input" placeholder="Pesquisar em toda a aplicação..." 
+                                   onkeypress="handleSearchKeypress(event)" id="globalSearch">
+                            <div class="search-icon">🔍</div>
+                        </div>
+                    </div>
+                    
+                    ${historySection}
+                    
+                    <div class="card text-center">
+                        <div style="font-size: 4rem; margin-bottom: 1rem;">🔍</div>
+                        <h3 class="text-bold mb-1">Pesquise em toda a aplicação</h3>
+                        <p class="text-grey mb-2">Encontre produtos, explicações, recursos e muito mais!</p>
                     </div>
                 `;
             }
@@ -3165,6 +3752,8 @@
                     </div>
                 </div>
                 
+                ${historySection}
+                
                 <h3 class="mb-2">Resultados da pesquisa (${results.length})</h3>
                 
                 ${results.map(result => `
@@ -3172,13 +3761,33 @@
                         <h4 class="text-bold mb-1">${result.title}</h4>
                         <p class="text-grey text-small">${result.subtitle}</p>
                         <div style="margin-top: 0.5rem;">
-                            <span style="background: var(--color-light-grey); padding: 0.25rem 0.5rem; border-radius: 10px; font-size: 0.8rem; color: var(--color-dark-grey);">
+                            <span style="background: var(--color-bg-secondary); padding: 0.25rem 0.5rem; border-radius: 10px; font-size: 0.8rem; color: var(--color-text-secondary);">
                                 Relevância: ${Math.round(result.score)}%
                             </span>
                         </div>
                     </div>
                 `).join('')}
             `;
+        }
+        
+        function removeSearchHistory(term) {
+            if (!window.searchHistory) return;
+            const index = window.searchHistory.indexOf(term);
+            if (index > -1) {
+                window.searchHistory.splice(index, 1);
+                localStorage.setItem('nexus_search_history', JSON.stringify(window.searchHistory));
+                if (currentPage === 'search') {
+                    renderPage();
+                }
+            }
+        }
+        
+        function clearSearchHistory() {
+            window.searchHistory = [];
+            localStorage.setItem('nexus_search_history', JSON.stringify(window.searchHistory));
+            if (currentPage === 'search') {
+                renderPage();
+            }
         }
         
         function viewSearchResult(type, id) {
@@ -3214,7 +3823,12 @@
             ];
             
             return navItems.map(item => `
-                <div class="sidebar-menu-item ${currentPage === item.id ? 'active' : ''}" onclick="navigateTo('${item.id}'); toggleSidebar();">
+                <div class="sidebar-menu-item ${currentPage === item.id ? 'active' : ''}" 
+                     onclick="navigateTo('${item.id}');" 
+                     role="button" 
+                     tabindex="0" 
+                     aria-label="${item.label}"
+                     onkeypress="if(event.key==='Enter'){navigateTo('${item.id}');}">
                     <div class="sidebar-menu-item-icon">${item.icon}</div>
                     <div class="sidebar-menu-item-label">${item.label}</div>
                 </div>
@@ -3242,6 +3856,18 @@
             }
         }
         
+        function closeSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            const burger = document.getElementById('burgerIcon');
+            
+            if (sidebar && sidebar.classList.contains('open')) {
+                sidebar.classList.remove('open');
+                overlay.classList.remove('active');
+                burger.classList.remove('active');
+            }
+        }
+        
         function createModal(title, content, actions = '') {
             return `
                 <div class="modal" onclick="closeModal(event)">
@@ -3256,6 +3882,8 @@
         
         function showModal(html) {
             document.getElementById('modalContainer').innerHTML = html;
+            // Prevent body scroll when modal is open
+            document.body.style.overflow = 'hidden';
         }
         
         function closeModal(event) {
@@ -3263,6 +3891,8 @@
                 document.getElementById('modalContainer').innerHTML = '';
                 uploadedImages = []; // Reset uploaded images when closing modal
                 reminderEnabled = false; // Reset reminder state
+                // Restore body scroll when modal is closed
+                document.body.style.overflow = '';
             }
         }
         
@@ -3642,7 +4272,7 @@
                 <div class="dashboard-geometric-bg"></div>
                 <div class="search-container">
                     <div style="position: relative;">
-                        <input type="text" class="search-input" placeholder="Pesquisar em toda a aplicação..." onkeypress="handleSearchKeypress(event)" id="globalSearch">
+                        <input type="text" class="search-input" placeholder="Pesquisar em toda a aplicação..." onkeypress="handleSearchKeypress(event)" id="globalSearch" aria-label="Pesquisa global">
                         <div class="search-icon">🔍</div>
                     </div>
                 </div>
@@ -3728,14 +4358,14 @@
                 <div class="marketplace-search-container mb-2">
                     <div style="position: relative;">
                         <input type="text" id="marketplaceSearch" class="search-input" 
-                               placeholder="Pesquisar produtos..." onkeyup="filterMarketplaceProducts()" 
-                               style="padding-right: 2.5rem;">
+                               placeholder="Pesquisar produtos..." onkeyup="debouncedFilterMarketplaceProducts()" 
+                               style="padding-right: 2.5rem;" aria-label="Pesquisar produtos no marketplace">
                         <div class="search-icon">🔍</div>
                     </div>
                 </div>
                 
                 <!-- Advanced Filters (Hidden by default) -->
-                <div id="marketplaceFilters" class="marketplace-filters" style="display: none; background: #f8f9fa; padding: 1rem; border-radius: 10px; margin-bottom: 1rem;">
+                <div id="marketplaceFilters" class="marketplace-filters" style="display: none; background: var(--color-bg-secondary); padding: 1rem; border-radius: 10px; margin-bottom: 1rem;">
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 0.5rem;">
                         <select id="filterCategory" class="select-field" onchange="filterMarketplaceProducts()">
                             <option value="">Todas as categorias</option>
@@ -3801,7 +4431,7 @@
                                     <span style="font-size: 1.25rem; font-weight: 600; color: var(--color-red);">${product.price}</span>
                                     <span class="text-grey text-small">👤 ${product.seller}</span>
                                 </div>
-                                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; color: var(--color-dark-grey);">
+                                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; color: var(--color-text-secondary);">
                                     <div>
                                         <span>👁️ ${product.views || 0}</span>
                                         <span style="margin-left: 0.5rem;">❤️ ${product.likes || 0}</span>
@@ -3822,10 +4452,10 @@
                 
                 <!-- Empty State -->
                 <div id="emptyMarketplace" style="display: none; text-align: center; padding: 2rem;">
-                    <div style="font-size: 3rem; margin-bottom: 1rem;">🔍</div>
-                    <h3 class="text-grey">Nenhum produto encontrado</h3>
-                    <p class="text-grey">Tenta ajustar os filtros ou pesquisar por algo diferente.</p>
-                    <button class="btn btn-orange" onclick="clearMarketplaceFilters()">Limpar filtros</button>
+                    <div style="font-size: 4rem; margin-bottom: 1rem;">📭</div>
+                    <h3 class="text-bold mb-1">Nenhum produto encontrado</h3>
+                    <p class="text-grey mb-2">Tenta ajustar os filtros ou pesquisar por algo diferente.</p>
+                    <button class="btn btn-orange" onclick="clearMarketplaceFilters()" aria-label="Limpar todos os filtros">🗑️ Limpar filtros</button>
                 </div>
             `;
         }
@@ -3852,26 +4482,55 @@
                     <p class="mb-1"><strong>Vendedor:</strong> ${product.seller}</p>
                     <p class="mb-1"><strong>Categoria:</strong> ${product.category}</p>
                     <p class="mb-1"><strong>Descrição:</strong> ${product.description}</p>
-                    <div style="display: flex; gap: 1rem; margin-top: 1rem; font-size: 0.9rem; color: var(--color-dark-grey);">
+                    <div style="display: flex; gap: 1rem; margin-top: 1rem; font-size: 0.9rem; color: var(--color-text-secondary);">
                         <span>👁️ ${product.views} visualizações</span>
                         <span>❤️ ${product.likes || 0} gostos</span>
                     </div>
                 </div>
                 
-                <div style="display: flex; gap: 0.5rem;">
-                    <button class="btn btn-red" style="flex: 1;" onclick="buyProduct(${id})">
-                        🛒 Comprar
+                <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+                    <button class="btn btn-red" style="flex: 1;" onclick="addProductToCart(${id}); closeModal();">
+                        🛒 Adicionar ao Carrinho
                     </button>
                     <button class="btn btn-orange" style="flex: 1;" onclick="contactSeller(${id})">
                         💬 Contactar
                     </button>
                 </div>
-                <button class="btn btn-grey" onclick="closeModal()">
+                <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+                    <button class="btn" id="favoriteProductBtn${id}" style="flex: 1;" onclick="toggleFavoriteProduct(${id})">
+                        🤍 Adicionar aos Favoritos
+                    </button>
+                    <button class="btn btn-grey" style="flex: 1;" onclick="shareProduct(${id})">
+                        📤 Partilhar
+                    </button>
+                </div>
+                ${product.sellerId === currentUser.id ? '<button class="btn btn-red" style="width: 100%; margin-bottom: 0.5rem;" onclick="deleteProduct(' + id + ')">🗑️ Eliminar Produto</button>' : ''}
+                <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--color-border);">
+                    <h4 class="text-bold mb-1">💬 Comentários (${product.comments?.length || 0})</h4>
+                    <div id="productComments${id}" style="max-height: 200px; overflow-y: auto; margin-bottom: 1rem;">
+                        ${renderProductComments(id)}
+                    </div>
+                    <textarea id="productCommentInput${id}" class="input-field" placeholder="Escreva um comentário..." style="height: 60px; resize: vertical; margin-bottom: 0.5rem;"></textarea>
+                    <button class="btn btn-primary" style="width: 100%;" onclick="addProductComment(${id})">
+                        💬 Comentar
+                    </button>
+                </div>
+                <button class="btn btn-grey" style="width: 100%; margin-top: 0.5rem;" onclick="closeModal()">
                     ✖️ Fechar
                 </button>
             `;
             
             showModal(createModal('Produto', modalContent));
+            
+            // Update favorite button state
+            setTimeout(() => {
+                const btn = document.getElementById(`favoriteProductBtn${id}`);
+                if (btn) {
+                    const isFav = isProductFavorite(id);
+                    btn.textContent = isFav ? '❤️ Remover dos Favoritos' : '🤍 Adicionar aos Favoritos';
+                    btn.className = isFav ? 'btn btn-orange' : 'btn btn-grey';
+                }
+            }, 100);
         }
         
         function addProduct() {
@@ -3945,6 +4604,11 @@
         }
         
         function publishProduct() {
+            // Prevent double-click
+            const btn = event?.target || document.querySelector('button[onclick*="publishProduct"]');
+            if (btn && btn.disabled) return;
+            if (btn) btn.disabled = true;
+            
             const name = document.getElementById('productName').value;
             const price = document.getElementById('productPrice').value;
             const condition = document.getElementById('productCondition').value;
@@ -3952,6 +4616,7 @@
             const description = document.getElementById('productDescription').value;
             
             if (!name || !price || !condition || !category || !description) {
+                if (btn) btn.disabled = false;
                 return;
             }
             
@@ -3963,15 +4628,37 @@
                 category,
                 description,
                 seller: currentUser.name,
+                sellerId: currentUser.id,
                 contact: currentUser.email,
                 image: uploadedImages.length > 0 ? uploadedImages[0] : null,
                 views: 0,
-                likes: 0
+                likes: 0,
+                createdAt: new Date().toISOString(),
+                comments: [],
+                ratings: []
             };
             
             mockData.products.unshift(newProduct); // Add to beginning
+            saveProducts();
+            
+            // Add to user history
+            if (!window.userHistory) window.userHistory = { purchases: [], sales: [], explanations: [] };
+            window.userHistory.sales.push({
+                productId: newProduct.id,
+                productName: newProduct.name,
+                date: new Date().toISOString(),
+                sold: false
+            });
+            saveHistory();
+            
+            // Add points
+            addPoints(10, 'Publicou um produto');
+            
+            // Clear uploaded images
+            uploadedImages = [];
             
             closeModal();
+            if (btn) btn.disabled = false;
             if (currentPage === 'marketplace' || currentPage === 'loja') {
                 renderPage();
             }
@@ -4061,7 +4748,7 @@
                                 <span style="font-size: 1.25rem; font-weight: 600; color: var(--color-red);">${product.price}</span>
                                 <span class="text-grey text-small">👤 ${product.seller}</span>
                             </div>
-                            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; color: var(--color-dark-grey);">
+                            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; color: var(--color-text-secondary);">
                                 <div>
                                     <span>👁️ ${product.views || 0}</span>
                                     <span style="margin-left: 0.5rem;">❤️ ${product.likes || 0}</span>
@@ -4179,7 +4866,7 @@
                                 <span style="font-size: 1.25rem; font-weight: 600; color: var(--color-purple);">${explanation.price}</span>
                                 <span style="color: var(--color-orange);">${explanation.rating}</span>
                             </div>
-                            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--color-dark-grey);">
+                            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--color-text-secondary);">
                                 <span>👥 ${explanation.students || 0} alunos</span>
                                 <span>⭐ ${explanation.reviews || 0} avaliações</span>
                             </div>
@@ -4192,6 +4879,9 @@
         function viewExplanation(id) {
             const explanation = mockData.explanations.find(e => e.id === id);
             if (!explanation) return;
+            
+            // Initialize ratings if not exists
+            if (!explanation.ratings) explanation.ratings = [];
             
             const modalContent = `
                 <div style="text-align: center; margin-bottom: 1.5rem;">
@@ -4208,26 +4898,65 @@
                     <p class="mb-1"><strong>Nível:</strong> ${explanation.level}</p>
                     <p class="mb-1"><strong>Disponibilidade:</strong> ${explanation.availability}</p>
                     <p class="mb-1"><strong>Descrição:</strong> ${explanation.description}</p>
-                    <div style="display: flex; gap: 1rem; margin-top: 1rem; font-size: 0.9rem; color: var(--color-dark-grey);">
+                    <div style="display: flex; gap: 1rem; margin-top: 1rem; font-size: 0.9rem; color: var(--color-text-secondary);">
                         <span>👥 ${explanation.students || 0} alunos</span>
                         <span>⭐ ${explanation.reviews || 0} avaliações</span>
                     </div>
                 </div>
                 
-                <div style="display: flex; gap: 0.5rem;">
-                    <button class="btn btn-purple" style="flex: 1;" onclick="hireExplanation(${id})">
-                        📚 Contratar
+                <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+                    <button class="btn btn-purple" style="flex: 1;" onclick="addExplanationToCart(${id}); closeModal();">
+                        🛒 Adicionar ao Carrinho
                     </button>
                     <button class="btn btn-orange" style="flex: 1;" onclick="contactTutor(${id})">
                         💬 Contactar
                     </button>
                 </div>
-                <button class="btn btn-grey" onclick="closeModal()">
+                <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+                    <button class="btn" id="favoriteExplanationBtn${id}" style="flex: 1;" onclick="toggleFavoriteExplanation(${id})">
+                        🤍 Adicionar aos Favoritos
+                    </button>
+                    <button class="btn btn-grey" style="flex: 1;" onclick="rateExplanation(${id})">
+                        ⭐ Avaliar
+                    </button>
+                </div>
+                ${explanation.tutorId === currentUser.id ? '<button class="btn btn-red" style="width: 100%; margin-bottom: 0.5rem;" onclick="deleteExplanation(' + id + ')">🗑️ Eliminar Explicação</button>' : ''}
+                <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--color-border);">
+                    <h4 class="text-bold mb-1">⭐ Avaliações (${explanation.reviews || 0})</h4>
+                    <div id="explanationRatings${id}" style="max-height: 200px; overflow-y: auto; margin-bottom: 1rem;">
+                        ${renderExplanationRatings(id)}
+                    </div>
+                    <div style="margin-bottom: 0.5rem;">
+                        <label class="text-small text-grey">Avaliar (1-5 estrelas):</label>
+                        <select id="explanationRatingInput${id}" class="select-field" style="margin-top: 0.25rem;">
+                            <option value="5">⭐⭐⭐⭐⭐ (5 - Excelente)</option>
+                            <option value="4">⭐⭐⭐⭐ (4 - Muito Bom)</option>
+                            <option value="3">⭐⭐⭐ (3 - Bom)</option>
+                            <option value="2">⭐⭐ (2 - Razoável)</option>
+                            <option value="1">⭐ (1 - Fraco)</option>
+                        </select>
+                    </div>
+                    <textarea id="explanationRatingComment${id}" class="input-field" placeholder="Comentário (opcional)..." style="height: 60px; resize: vertical; margin-bottom: 0.5rem;"></textarea>
+                    <button class="btn btn-primary" style="width: 100%;" onclick="submitExplanationRating(${id})">
+                        ⭐ Submeter Avaliação
+                    </button>
+                </div>
+                <button class="btn btn-grey" style="width: 100%; margin-top: 0.5rem;" onclick="closeModal()">
                     ✖️ Fechar
                 </button>
             `;
             
             showModal(createModal('Explicação', modalContent));
+            
+            // Update favorite button state
+            setTimeout(() => {
+                const btn = document.getElementById(`favoriteExplanationBtn${id}`);
+                if (btn) {
+                    const isFav = isExplanationFavorite(id);
+                    btn.textContent = isFav ? '❤️ Remover dos Favoritos' : '🤍 Adicionar aos Favoritos';
+                    btn.className = isFav ? 'btn btn-orange' : 'btn btn-grey';
+                }
+            }, 100);
         }
         
         function addExplanation() {
@@ -4282,13 +5011,30 @@
                 availability,
                 description,
                 tutor: currentUser.name,
+                tutorId: currentUser.id,
                 contact: currentUser.email,
                 rating: "Novo",
                 students: 0,
-                reviews: 0
+                reviews: 0,
+                createdAt: new Date().toISOString(),
+                comments: [],
+                ratings: []
             };
             
             mockData.explanations.unshift(newExplanation);
+            saveExplanations();
+            
+            // Add to user history
+            if (!window.userHistory) window.userHistory = { purchases: [], sales: [], explanations: [] };
+            window.userHistory.explanations.push({
+                explanationId: newExplanation.id,
+                subject: newExplanation.subject,
+                date: new Date().toISOString()
+            });
+            saveHistory();
+            
+            // Add points
+            addPoints(10, 'Ofereceu uma explicação');
             
             closeModal();
             if (currentPage === 'explanations' || currentPage === 'loja') {
@@ -4330,8 +5076,8 @@
                     <div class="marketplace-search-container mb-2">
                         <div style="position: relative;">
                             <input type="text" id="lojaProductSearch" class="search-input" 
-                                   placeholder="Pesquisar produtos..." onkeyup="filterLojaProducts()" 
-                                   style="padding-right: 2.5rem;">
+                                   placeholder="Pesquisar produtos..." onkeyup="debouncedFilterLojaProducts()" 
+                                   style="padding-right: 2.5rem;" aria-label="Pesquisar produtos">
                             <div class="search-icon">🔍</div>
                         </div>
                     </div>
@@ -4342,7 +5088,7 @@
                         </button>
                     </div>
                     
-                    <div id="lojaFilters" class="marketplace-filters" style="display: none; background: #f8f9fa; padding: 1rem; border-radius: 10px; margin-bottom: 1rem;">
+                    <div id="lojaFilters" class="marketplace-filters" style="display: none; background: var(--color-bg-secondary); padding: 1rem; border-radius: 10px; margin-bottom: 1rem;">
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 0.5rem;">
                             <select id="lojaFilterCategory" class="select-field" onchange="filterLojaProducts()">
                                 <option value="">Todas as categorias</option>
@@ -4406,7 +5152,7 @@
                                         <span style="font-size: 1.25rem; font-weight: 600; color: var(--color-red);">${product.price}</span>
                                         <span class="text-grey text-small">👤 ${product.seller}</span>
                                     </div>
-                                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; color: var(--color-dark-grey);">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; color: var(--color-text-secondary);">
                                         <div>
                                             <span>👁️ ${product.views || 0}</span>
                                             <span style="margin-left: 0.5rem;">❤️ ${product.likes || 0}</span>
@@ -4426,10 +5172,10 @@
                     </div>
                     
                     <div id="emptyLojaProducts" style="display: none; text-align: center; padding: 2rem;">
-                        <div style="font-size: 3rem; margin-bottom: 1rem;">🔍</div>
-                        <h3 class="text-grey">Nenhum produto encontrado</h3>
-                        <p class="text-grey">Tenta ajustar os filtros ou pesquisar por algo diferente.</p>
-                        <button class="btn btn-orange" onclick="clearLojaFilters()">Limpar filtros</button>
+                        <div style="font-size: 4rem; margin-bottom: 1rem;">📭</div>
+                        <h3 class="text-bold mb-1">Nenhum produto encontrado</h3>
+                        <p class="text-grey mb-2">Tenta ajustar os filtros ou pesquisar por algo diferente.</p>
+                        <button class="btn btn-orange" onclick="clearLojaFilters()" aria-label="Limpar todos os filtros">🗑️ Limpar filtros</button>
                     </div>
                 ` : `
                     <!-- Explanations Section -->
@@ -4442,8 +5188,8 @@
                     <div class="marketplace-search-container mb-2">
                         <div style="position: relative;">
                             <input type="text" id="lojaExplanationSearch" class="search-input" 
-                                   placeholder="Pesquisar explicações..." onkeyup="filterLojaExplanations()" 
-                                   style="padding-right: 2.5rem;">
+                                   placeholder="Pesquisar explicações..." onkeyup="debouncedFilterLojaExplanations()" 
+                                   style="padding-right: 2.5rem;" aria-label="Pesquisar explicações">
                             <div class="search-icon">🔍</div>
                         </div>
                     </div>
@@ -4458,7 +5204,7 @@
                                     <span style="font-size: 1.25rem; font-weight: 600; color: var(--color-purple);">${explanation.price}</span>
                                     <span style="color: var(--color-orange);">${explanation.rating}</span>
                                 </div>
-                                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--color-dark-grey);">
+                                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--color-text-secondary);">
                                     <span>👥 ${explanation.students || 0} alunos</span>
                                     <span>⭐ ${explanation.reviews || 0} avaliações</span>
                                 </div>
@@ -4467,9 +5213,9 @@
                     </div>
                     
                     <div id="emptyLojaExplanations" style="display: none; text-align: center; padding: 2rem;">
-                        <div style="font-size: 3rem; margin-bottom: 1rem;">🔍</div>
-                        <h3 class="text-grey">Nenhuma explicação encontrada</h3>
-                        <p class="text-grey">Tenta pesquisar por algo diferente.</p>
+                        <div style="font-size: 4rem; margin-bottom: 1rem;">📚</div>
+                        <h3 class="text-bold mb-1">Nenhuma explicação encontrada</h3>
+                        <p class="text-grey mb-2">Tenta pesquisar por algo diferente ou verifica os filtros.</p>
                     </div>
                 `}
             `;
@@ -4546,7 +5292,7 @@
                                     <span style="font-size: 1.25rem; font-weight: 600; color: var(--color-red);">${product.price}</span>
                                     <span class="text-grey text-small">👤 ${product.seller}</span>
                                 </div>
-                                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; color: var(--color-dark-grey);">
+                                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; color: var(--color-text-secondary);">
                                     <div>
                                         <span>👁️ ${product.views || 0}</span>
                                         <span style="margin-left: 0.5rem;">❤️ ${product.likes || 0}</span>
@@ -4600,7 +5346,7 @@
                                 <span style="font-size: 1.25rem; font-weight: 600; color: var(--color-purple);">${explanation.price}</span>
                                 <span style="color: var(--color-orange);">${explanation.rating}</span>
                             </div>
-                            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--color-dark-grey);">
+                            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--color-text-secondary);">
                                 <span>👥 ${explanation.students || 0} alunos</span>
                                 <span>⭐ ${explanation.reviews || 0} avaliações</span>
                             </div>
@@ -4625,6 +5371,11 @@
             });
             filterLojaProducts();
         }
+        
+        // Debounced versions of filter functions for better performance
+        const debouncedFilterLojaProducts = debounce(filterLojaProducts, 300);
+        const debouncedFilterLojaExplanations = debounce(filterLojaExplanations, 300);
+        const debouncedFilterMarketplaceProducts = debounce(filterMarketplaceProducts, 300);
         
         // Chat Page
         function renderChatPage() {
@@ -4660,9 +5411,9 @@
                 
                 ${availableChats.length === 0 ? `
                     <div class="card text-center">
-                        <div style="font-size: 3rem; margin-bottom: 1rem;">💬</div>
-                        <h3>Nenhuma conversa disponível</h3>
-                        <p class="text-grey">As suas conversas aparecerão aqui.</p>
+                        <div style="font-size: 4rem; margin-bottom: 1rem;">💬</div>
+                        <h3 class="text-bold mb-1">Nenhuma conversa disponível</h3>
+                        <p class="text-grey mb-2">As suas conversas aparecerão aqui quando começar a comunicar com outros utilizadores.</p>
                         <p class="text-grey text-small mt-2">
                             ${currentUser.role === 'aluno' ? 'Nota: Alunos não podem conversar diretamente com encarregados de educação.' : ''}
                         </p>
@@ -4708,8 +5459,8 @@
                     </div>
                     
                     <div class="chat-input-container">
-                        <textarea class="chat-input" id="messageInput" placeholder="Escreva a sua mensagem..." rows="1" onkeypress="handleMessageKeypress(event)"></textarea>
-                        <button class="send-btn" onclick="sendMessage()">➤</button>
+                        <textarea class="chat-input" id="messageInput" placeholder="Escreva a sua mensagem..." rows="1" onkeypress="handleMessageKeypress(event)" aria-label="Campo de mensagem"></textarea>
+                        <button class="send-btn" onclick="sendMessage()" aria-label="Enviar mensagem" type="button">➤</button>
                     </div>
                 </div>
             `;
@@ -4728,11 +5479,14 @@
             chat.unread = 0; // Mark as read
             renderPage();
             
-            // Scroll to bottom of messages
+            // Scroll to bottom of messages smoothly
             setTimeout(() => {
                 const messagesContainer = document.getElementById('chatMessages');
                 if (messagesContainer) {
-                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                    messagesContainer.scrollTo({
+                        top: messagesContainer.scrollHeight,
+                        behavior: 'smooth'
+                    });
                 }
             }, 100);
         }
@@ -4760,10 +5514,21 @@
         }
         
         function sendMessage() {
+            // Prevent double-click
+            const btn = event?.target || document.querySelector('.send-btn');
+            if (btn && btn.disabled) return;
+            if (btn) {
+                btn.disabled = true;
+                setTimeout(() => { if (btn) btn.disabled = false; }, 500);
+            }
+            
             const input = document.getElementById('messageInput');
             const content = input.value.trim();
             
-            if (!content) return;
+            if (!content) {
+                if (btn) btn.disabled = false;
+                return;
+            }
             
             const newMessage = {
                 sender: 'Eu',
@@ -4799,14 +5564,20 @@
                 currentChat.time = responseMessage.time;
                 currentChat.updatedAt = Date.now();
                 
+                // Save chats to localStorage
+                saveChats();
+                
                 if (currentPage === 'chat' && currentChat) {
                     renderPage();
                     
-                    // Scroll to bottom
+                    // Scroll to bottom smoothly
                     setTimeout(() => {
                         const messagesContainer = document.getElementById('chatMessages');
                         if (messagesContainer) {
-                            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                            messagesContainer.scrollTo({
+                                top: messagesContainer.scrollHeight,
+                                behavior: 'smooth'
+                            });
                         }
                     }, 100);
                 }
@@ -4816,7 +5587,10 @@
             setTimeout(() => {
                 const messagesContainer = document.getElementById('chatMessages');
                 if (messagesContainer) {
-                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                            messagesContainer.scrollTo({
+                                top: messagesContainer.scrollHeight,
+                                behavior: 'smooth'
+                            });
                 }
             }, 100);
         }
@@ -5004,7 +5778,10 @@
                     </div>
                 `;
                 messagesContainer.appendChild(typingDiv);
-                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                            messagesContainer.scrollTo({
+                                top: messagesContainer.scrollHeight,
+                                behavior: 'smooth'
+                            });
             }
         }
         
@@ -5032,7 +5809,7 @@
                             </div>
                             <div style="display: flex; justify-content: space-between; align-items: center;">
                                 <span style="color: var(--color-orange);">⭐ ${resource.rating || 'N/A'}</span>
-                                <div style="font-size: 0.8rem; color: var(--color-dark-grey);">
+                                <div style="font-size: 0.8rem; color: var(--color-text-secondary);">
                                     ${resource.tags ? resource.tags.slice(0, 2).map(tag => `<span style="background: var(--color-light-grey); padding: 0.2rem 0.4rem; border-radius: 8px; margin-left: 0.2rem;">${tag}</span>`).join('') : ''}
                                 </div>
                             </div>
@@ -5119,9 +5896,9 @@
                 
                 ${mockData.agenda.length === 0 ? `
                     <div class="card text-center">
-                        <div style="font-size: 3rem; margin-bottom: 1rem;">📅</div>
-                        <h3>Agenda vazia</h3>
-                        <p class="text-grey">Adicione eventos à sua agenda usando o botão +</p>
+                        <div style="font-size: 4rem; margin-bottom: 1rem;">📅</div>
+                        <h3 class="text-bold mb-1">Agenda vazia</h3>
+                        <p class="text-grey mb-2">Adicione eventos, trabalhos de casa e lembretes à sua agenda usando o botão +</p>
                     </div>
                 ` : ''}
             `;
@@ -5233,16 +6010,91 @@
                 priority,
                 location,
                 description,
-                reminder: shouldRemind
+                reminder: shouldRemind,
+                reminderSent: false,
+                createdAt: new Date().toISOString()
             };
             
             mockData.agenda.push(newItem);
+            mockData.agendaItems = mockData.agenda; // Sync with agendaItems
+            saveAgenda();
+            
+            // Schedule reminder if enabled
+            if (shouldRemind) {
+                scheduleReminder(newItem);
+            }
+            
+            // Add points
+            addPoints(5, 'Adicionou um evento à agenda');
             
             closeModal();
             if (currentPage === 'agenda') {
                 renderPage();
             }
         }
+        
+        // Schedule reminder for agenda item
+        function scheduleReminder(item) {
+            const reminderTime = new Date(`${item.date}T${item.time}`);
+            const now = new Date();
+            
+            // Only schedule if reminder is in the future
+            if (reminderTime > now) {
+                // Schedule notification 1 hour before event
+                const reminderDate = new Date(reminderTime.getTime() - 60 * 60 * 1000);
+                
+                // Store reminder in localStorage
+                const reminders = JSON.parse(localStorage.getItem('nexus_reminders') || '[]');
+                reminders.push({
+                    id: item.id,
+                    agendaItemId: item.id,
+                    title: item.title,
+                    date: item.date,
+                    time: item.time,
+                    reminderTime: reminderDate.toISOString(),
+                    sent: false
+                });
+                localStorage.setItem('nexus_reminders', JSON.stringify(reminders));
+                
+                // Check reminders periodically
+                checkReminders();
+            }
+        }
+        
+        // Check and send reminders
+        function checkReminders() {
+            const reminders = JSON.parse(localStorage.getItem('nexus_reminders') || '[]');
+            const now = new Date();
+            
+            reminders.forEach(reminder => {
+                if (!reminder.sent && new Date(reminder.reminderTime) <= now) {
+                    // Send notification
+                    if ('Notification' in window && Notification.permission === 'granted') {
+                        new Notification(`🔔 Lembrete: ${reminder.title}`, {
+                            body: `O evento "${reminder.title}" é às ${reminder.time}`,
+                            icon: '/favicon.ico',
+                            badge: '/favicon.ico'
+                        });
+                    }
+                    
+                    reminder.sent = true;
+                }
+            });
+            
+            // Remove old sent reminders (older than 24 hours)
+            const filteredReminders = reminders.filter(r => {
+                if (r.sent) {
+                    const sentTime = new Date(r.reminderTime);
+                    return (now - sentTime) < 24 * 60 * 60 * 1000;
+                }
+                return true;
+            });
+            
+            localStorage.setItem('nexus_reminders', JSON.stringify(filteredReminders));
+        }
+        
+        // Check reminders every minute
+        setInterval(checkReminders, 60000);
         
         // Profile Page
         function renderProfilePage() {
@@ -5266,54 +6118,62 @@
                 </div>
                 
                 <div class="card">
-                    <h3 class="text-bold mb-2">Estatísticas</h3>
+                    <h3 class="text-bold mb-2">💰 Pontos e Estatísticas</h3>
+                    <div style="text-align: center; padding: 1rem; background: linear-gradient(135deg, var(--color-blue-dark), var(--color-purple)); color: white; border-radius: 10px; margin-bottom: 1rem;">
+                        <div style="font-size: 2.5rem; font-weight: bold;">${window.userPoints?.points || 0}</div>
+                        <div style="font-size: 0.9rem; opacity: 0.9;">Pontos Totais</div>
+                    </div>
                     <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
-                        <div style="text-align: center; padding: 1rem; background: var(--color-light-grey); border-radius: 10px;">
-                            <div style="font-size: 1.5rem; font-weight: bold; color: var(--color-blue-dark);">${mockData.products.filter(p => p.seller === currentUser.name).length}</div>
-                            <div style="font-size: 0.8rem; color: var(--color-dark-grey);">Produtos vendidos</div>
+                        <div style="text-align: center; padding: 1rem; background: var(--color-bg-secondary); border-radius: 10px;">
+                            <div style="font-size: 1.5rem; font-weight: bold; color: var(--color-red);">${window.userHistory?.sales?.length || 0}</div>
+                            <div style="font-size: 0.8rem; color: var(--color-text-secondary);">Produtos Publicados</div>
                         </div>
-                        <div style="text-align: center; padding: 1rem; background: var(--color-light-grey); border-radius: 10px;">
-                            <div style="font-size: 1.5rem; font-weight: bold; color: var(--color-purple);">${mockData.explanations.filter(e => e.tutor === currentUser.name).length}</div>
-                            <div style="font-size: 0.8rem; color: var(--color-dark-grey);">Explicações oferecidas</div>
+                        <div style="text-align: center; padding: 1rem; background: var(--color-bg-secondary); border-radius: 10px;">
+                            <div style="font-size: 1.5rem; font-weight: bold; color: var(--color-purple);">${window.userHistory?.explanations?.length || 0}</div>
+                            <div style="font-size: 0.8rem; color: var(--color-text-secondary);">Explicações Oferecidas</div>
+                        </div>
+                        <div style="text-align: center; padding: 1rem; background: var(--color-bg-secondary); border-radius: 10px;">
+                            <div style="font-size: 1.5rem; font-weight: bold; color: var(--color-orange);">${window.userHistory?.purchases?.length || 0}</div>
+                            <div style="font-size: 0.8rem; color: var(--color-text-secondary);">Compras Realizadas</div>
+                        </div>
+                        <div style="text-align: center; padding: 1rem; background: var(--color-bg-secondary); border-radius: 10px;">
+                            <div style="font-size: 1.5rem; font-weight: bold; color: var(--color-blue-dark);">${(window.userFavorites?.products?.length || 0) + (window.userFavorites?.explanations?.length || 0)}</div>
+                            <div style="font-size: 0.8rem; color: var(--color-text-secondary);">Favoritos</div>
                         </div>
                     </div>
                 </div>
                 
+                <div class="card">
+                    <h3 class="text-bold mb-2">📋 Acesso Rápido</h3>
+                    <button class="btn btn-orange" style="width: 100%; margin-bottom: 0.5rem;" onclick="navigateTo('favorites')">
+                        ❤️ Os Meus Favoritos
+                    </button>
+                    <button class="btn btn-red" style="width: 100%; margin-bottom: 0.5rem;" onclick="navigateTo('myProducts')">
+                        📦 Os Meus Produtos
+                    </button>
+                    <button class="btn btn-purple" style="width: 100%; margin-bottom: 0.5rem;" onclick="navigateTo('myExplanations')">
+                        📚 As Minhas Explicações
+                    </button>
+                    <button class="btn btn-blue" style="width: 100%; margin-bottom: 0.5rem;" onclick="navigateTo('myHistory')">
+                        📊 O Meu Histórico
+                    </button>
+                </div>
+                
                 <!-- Achievements Section -->
                 <div class="card">
-                    <h3 class="text-bold mb-2">🏆 Conquistas</h3>
+                    <h3 class="text-bold mb-2">🏆 Conquistas (${window.userPoints?.achievements?.length || 0})</h3>
                     <div class="achievements-grid">
-                        <div class="achievement ${mockData.products.filter(p => p.seller === currentUser.name).length > 0 ? 'unlocked' : 'locked'}">
-                            <div class="achievement-icon">🛍️</div>
-                            <div class="achievement-text">
-                                <div class="achievement-title">Primeiro Vendedor</div>
-                                <div class="achievement-desc">Vendeu o primeiro produto</div>
+                        ${(window.userPoints?.achievements || []).map(achievement => `
+                            <div class="achievement unlocked">
+                                <div class="achievement-icon">🏆</div>
+                                <div class="achievement-text">
+                                    <div class="achievement-title">${achievement.name}</div>
+                                    <div class="achievement-desc">${achievement.desc}</div>
+                                    <div class="text-small text-grey">Desbloqueado em ${new Date(achievement.unlockedAt).toLocaleDateString('pt-PT')}</div>
+                                </div>
                             </div>
-                        </div>
-                        
-                        <div class="achievement ${mockData.chats.filter(c => c.name.includes(currentUser.name)).length > 0 ? 'unlocked' : 'locked'}">
-                            <div class="achievement-icon">💬</div>
-                            <div class="achievement-text">
-                                <div class="achievement-title">Comunicador</div>
-                                <div class="achievement-desc">Iniciou uma conversa</div>
-                            </div>
-                        </div>
-                        
-                        <div class="achievement ${currentUser.region === 'Porto' ? 'unlocked' : 'locked'}">
-                            <div class="achievement-icon">🏛️</div>
-                            <div class="achievement-text">
-                                <div class="achievement-title">Tripeiro</div>
-                                <div class="achievement-desc">É da região do Porto</div>
-                            </div>
-                        </div>
-                        
-                        <div class="achievement ${Date.now() % 2 === 0 ? 'unlocked' : 'locked'}">
-                            <div class="achievement-icon">⭐</div>
-                            <div class="achievement-text">
-                                <div class="achievement-title">Utilizador Ativo</div>
-                                <div class="achievement-desc">Usa a app regularmente</div>
-                            </div>
-                        </div>
+                        `).join('')}
+                        ${(window.userPoints?.achievements || []).length === 0 ? '<p class="text-grey text-center">Ainda não desbloqueou conquistas. Continue a usar a aplicação!</p>' : ''}
                     </div>
                 </div>
                 
@@ -5728,9 +6588,9 @@
                         name: 'Utilizador Demo',
                         email: 'demo@nexus.pt',
                         role: 'Aluno',
-                        region: 'Lisboa',
+                        region: 'Porto',
                         educationLevel: 'Ensino Secundário (10º-12º)',
-                        school: 'Escola Secundária de Lisboa',
+                        school: 'Escola Profissional Profitecla',
                         id: 1
                     };
                 } else {
@@ -5739,9 +6599,9 @@
                         name: username,
                         email: username + '@nexus.pt',
                         role: 'Aluno',
-                        region: 'Lisboa',
+                        region: 'Porto',
                         educationLevel: 'Ensino Secundário (10º-12º)',
-                        school: 'Escola Secundária de Lisboa',
+                        school: 'Escola Profissional Profitecla',
                         id: Date.now()
                     };
                 }
@@ -6260,23 +7120,345 @@
         
         function buyProduct(id) {
             const product = mockData.products.find(p => p.id === id);
-            product.likes = (product.likes || 0) + 1;
+            if (!product) return;
+            
+            // Add to purchase history
+            if (!window.userHistory) window.userHistory = { purchases: [], sales: [], explanations: [] };
+            window.userHistory.purchases.push({
+                productId: product.id,
+                productName: product.name,
+                seller: product.seller,
+                price: product.price,
+                date: new Date().toISOString()
+            });
+            saveHistory();
+            
+            // Mark as sold if it's user's product
+            if (product.sellerId === currentUser.id) {
+                const sale = window.userHistory.sales.find(s => s.productId === product.id);
+                if (sale) {
+                    sale.sold = true;
+                    sale.soldDate = new Date().toISOString();
+                    saveHistory();
+                }
+            }
+            
+            // Add points
+            addPoints(20, 'Comprou um produto');
+            
             closeModal();
+            showNotification('Compra Realizada', `Comprou "${product.name}" com sucesso!`, 'success');
         }
         
         function contactSeller(id) {
             const product = mockData.products.find(p => p.id === id);
+            if (!product) return;
+            
+            // Open chat or create new chat
+            const chatName = product.seller;
+            let chat = mockData.chats.find(c => c.name === chatName);
+            
+            if (!chat) {
+                chat = {
+                    id: Date.now(),
+                    name: chatName,
+                    type: 'private',
+                    messages: [],
+                    unread: 0,
+                    time: new Date().toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' }),
+                    lastMessage: '',
+                    updatedAt: Date.now()
+                };
+                mockData.chats.push(chat);
+                saveChats();
+            }
+            
             closeModal();
+            navigateTo('chat');
+            setTimeout(() => openChat(chat.id), 100);
         }
         
         function hireExplanation(id) {
             const explanation = mockData.explanations.find(e => e.id === id);
+            if (!explanation) return;
+            
+            // Add to history
+            if (!window.userHistory) window.userHistory = { purchases: [], sales: [], explanations: [] };
+            
+            // Add points
+            addPoints(15, 'Contratou uma explicação');
+            
             closeModal();
+            showNotification('Explicação Contratada', `Contratou explicação de ${explanation.subject} com ${explanation.tutor}!`, 'success');
         }
         
         function contactTutor(id) {
             const explanation = mockData.explanations.find(e => e.id === id);
+            if (!explanation) return;
+            
+            // Open chat or create new chat
+            const chatName = explanation.tutor;
+            let chat = mockData.chats.find(c => c.name === chatName);
+            
+            if (!chat) {
+                chat = {
+                    id: Date.now(),
+                    name: chatName,
+                    type: 'private',
+                    messages: [],
+                    unread: 0,
+                    time: new Date().toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' }),
+                    lastMessage: '',
+                    updatedAt: Date.now()
+                };
+                mockData.chats.push(chat);
+                saveChats();
+            }
+            
             closeModal();
+            navigateTo('chat');
+            setTimeout(() => openChat(chat.id), 100);
+        }
+        
+        // === FAVORITES SYSTEM ===
+        
+        function isProductFavorite(id) {
+            if (!window.userFavorites) return false;
+            return window.userFavorites.products?.includes(id) || false;
+        }
+        
+        function isExplanationFavorite(id) {
+            if (!window.userFavorites) return false;
+            return window.userFavorites.explanations?.includes(id) || false;
+        }
+        
+        function toggleFavoriteProduct(id) {
+            if (!window.userFavorites) window.userFavorites = { products: [], explanations: [] };
+            if (!window.userFavorites.products) window.userFavorites.products = [];
+            
+            const index = window.userFavorites.products.indexOf(id);
+            const btn = document.getElementById(`favoriteProductBtn${id}`);
+            
+            if (index > -1) {
+                window.userFavorites.products.splice(index, 1);
+                if (btn) {
+                    btn.textContent = '🤍 Adicionar aos Favoritos';
+                    btn.className = 'btn btn-grey';
+                }
+                addPoints(-2, 'Removeu dos favoritos');
+            } else {
+                window.userFavorites.products.push(id);
+                if (btn) {
+                    btn.textContent = '❤️ Remover dos Favoritos';
+                    btn.className = 'btn btn-orange';
+                }
+                addPoints(5, 'Adicionou aos favoritos');
+            }
+            
+            saveFavorites();
+        }
+        
+        function toggleFavoriteExplanation(id) {
+            if (!window.userFavorites) window.userFavorites = { products: [], explanations: [] };
+            if (!window.userFavorites.explanations) window.userFavorites.explanations = [];
+            
+            const index = window.userFavorites.explanations.indexOf(id);
+            const btn = document.getElementById(`favoriteExplanationBtn${id}`);
+            
+            if (index > -1) {
+                window.userFavorites.explanations.splice(index, 1);
+                if (btn) {
+                    btn.textContent = '🤍 Adicionar aos Favoritos';
+                    btn.className = 'btn btn-grey';
+                }
+                addPoints(-2, 'Removeu dos favoritos');
+            } else {
+                window.userFavorites.explanations.push(id);
+                if (btn) {
+                    btn.textContent = '❤️ Remover dos Favoritos';
+                    btn.className = 'btn btn-orange';
+                }
+                addPoints(5, 'Adicionou aos favoritos');
+            }
+            
+            saveFavorites();
+        }
+        
+        // === COMMENTS SYSTEM ===
+        
+        function renderProductComments(productId) {
+            const product = mockData.products.find(p => p.id === productId);
+            if (!product || !product.comments || product.comments.length === 0) {
+                return '<p class="text-grey text-small">Ainda não há comentários. Seja o primeiro!</p>';
+            }
+            
+            return product.comments.map(comment => `
+                <div style="padding: 0.75rem; margin-bottom: 0.5rem; background: var(--color-bg-secondary); border-radius: 8px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
+                        <strong>${comment.user}</strong>
+                        <span class="text-small text-grey">${comment.date}</span>
+                    </div>
+                    <p style="margin: 0; font-size: 0.9rem;">${comment.text}</p>
+                </div>
+            `).join('');
+        }
+        
+        function addProductComment(productId) {
+            const product = mockData.products.find(p => p.id === productId);
+            if (!product) return;
+            
+            const commentInput = document.getElementById(`productCommentInput${productId}`);
+            const commentText = commentInput?.value.trim();
+            
+            if (!commentText) return;
+            
+            if (!product.comments) product.comments = [];
+            
+            product.comments.push({
+                id: Date.now(),
+                user: currentUser.name,
+                userId: currentUser.id,
+                text: commentText,
+                date: new Date().toLocaleDateString('pt-PT')
+            });
+            
+            saveProducts();
+            addPoints(3, 'Comentou num produto');
+            
+            // Refresh comments display
+            const commentsDiv = document.getElementById(`productComments${productId}`);
+            if (commentsDiv) {
+                commentsDiv.innerHTML = renderProductComments(productId);
+            }
+            
+            if (commentInput) commentInput.value = '';
+        }
+        
+        // === RATINGS SYSTEM ===
+        
+        function renderExplanationRatings(explanationId) {
+            const explanation = mockData.explanations.find(e => e.id === explanationId);
+            if (!explanation || !explanation.ratings || explanation.ratings.length === 0) {
+                return '<p class="text-grey text-small">Ainda não há avaliações. Seja o primeiro a avaliar!</p>';
+            }
+            
+            return explanation.ratings.map(rating => `
+                <div style="padding: 0.75rem; margin-bottom: 0.5rem; background: var(--color-bg-secondary); border-radius: 8px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
+                        <div>
+                            <strong>${rating.user}</strong>
+                            <div>${'⭐'.repeat(rating.rating)}</div>
+                        </div>
+                        <span class="text-small text-grey">${rating.date}</span>
+                    </div>
+                    ${rating.comment ? `<p style="margin: 0; font-size: 0.9rem;">${rating.comment}</p>` : ''}
+                </div>
+            `).join('');
+        }
+        
+        function submitExplanationRating(explanationId) {
+            const explanation = mockData.explanations.find(e => e.id === explanationId);
+            if (!explanation) return;
+            
+            const ratingInput = document.getElementById(`explanationRatingInput${explanationId}`);
+            const commentInput = document.getElementById(`explanationRatingComment${explanationId}`);
+            
+            const rating = parseInt(ratingInput?.value) || 5;
+            const comment = commentInput?.value.trim() || '';
+            
+            if (!explanation.ratings) explanation.ratings = [];
+            
+            // Check if user already rated
+            const existingRating = explanation.ratings.find(r => r.userId === currentUser.id);
+            if (existingRating) {
+                existingRating.rating = rating;
+                existingRating.comment = comment;
+                existingRating.date = new Date().toLocaleDateString('pt-PT');
+            } else {
+                explanation.ratings.push({
+                    id: Date.now(),
+                    user: currentUser.name,
+                    userId: currentUser.id,
+                    rating: rating,
+                    comment: comment,
+                    date: new Date().toLocaleDateString('pt-PT')
+                });
+                explanation.reviews = (explanation.reviews || 0) + 1;
+            }
+            
+            // Calculate average rating
+            const avgRating = explanation.ratings.reduce((sum, r) => sum + r.rating, 0) / explanation.ratings.length;
+            explanation.rating = `${avgRating.toFixed(1)}★`;
+            
+            saveExplanations();
+            addPoints(5, 'Avaliou uma explicação');
+            
+            // Refresh ratings display
+            const ratingsDiv = document.getElementById(`explanationRatings${explanationId}`);
+            if (ratingsDiv) {
+                ratingsDiv.innerHTML = renderExplanationRatings(explanationId);
+            }
+            
+            if (commentInput) commentInput.value = '';
+            if (ratingInput) ratingInput.value = '5';
+        }
+        
+        function rateExplanation(id) {
+            // Just open the rating section in the modal
+            const ratingSection = document.querySelector(`#explanationRatings${id}`)?.parentElement;
+            if (ratingSection) {
+                ratingSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+        
+        // === DELETE FUNCTIONS ===
+        
+        function deleteProduct(id) {
+            if (!confirm('Tem a certeza que deseja eliminar este produto?')) return;
+            
+            const index = mockData.products.findIndex(p => p.id === id);
+            if (index > -1) {
+                mockData.products.splice(index, 1);
+                saveProducts();
+                
+                // Remove from favorites
+                if (window.userFavorites?.products) {
+                    const favIndex = window.userFavorites.products.indexOf(id);
+                    if (favIndex > -1) {
+                        window.userFavorites.products.splice(favIndex, 1);
+                        saveFavorites();
+                    }
+                }
+                
+                closeModal();
+                if (currentPage === 'marketplace' || currentPage === 'loja') {
+                    renderPage();
+                }
+            }
+        }
+        
+        function deleteExplanation(id) {
+            if (!confirm('Tem a certeza que deseja eliminar esta explicação?')) return;
+            
+            const index = mockData.explanations.findIndex(e => e.id === id);
+            if (index > -1) {
+                mockData.explanations.splice(index, 1);
+                saveExplanations();
+                
+                // Remove from favorites
+                if (window.userFavorites?.explanations) {
+                    const favIndex = window.userFavorites.explanations.indexOf(id);
+                    if (favIndex > -1) {
+                        window.userFavorites.explanations.splice(favIndex, 1);
+                        saveFavorites();
+                    }
+                }
+                
+                closeModal();
+                if (currentPage === 'explanations' || currentPage === 'loja') {
+                    renderPage();
+                }
+            }
         }
         
         function downloadResource(id) {
@@ -6498,8 +7680,420 @@
                 case 'profile':
                     content.innerHTML = renderProfilePage();
                     break;
+                case 'favorites':
+                    content.innerHTML = renderFavoritesPage();
+                    break;
+                case 'myProducts':
+                    content.innerHTML = renderMyProductsPage();
+                    break;
+                case 'myExplanations':
+                    content.innerHTML = renderMyExplanationsPage();
+                    break;
+                case 'myHistory':
+                    content.innerHTML = renderMyHistoryPage();
+                    break;
+                case 'cart':
+                    content.innerHTML = renderCartPage();
+                    break;
                 default:
                     content.innerHTML = renderLoginPage();
+            }
+            
+            // Update cart icon after page render
+            setTimeout(updateCartIcon, 100);
+        }
+        
+        // === NEW PAGES ===
+        
+        function renderFavoritesPage() {
+            const favoriteProducts = mockData.products.filter(p => window.userFavorites?.products?.includes(p.id) || false);
+            const favoriteExplanations = mockData.explanations.filter(e => window.userFavorites?.explanations?.includes(e.id) || false);
+            
+            return `
+                <div class="page-header">
+                    <h2>❤️ Os Meus Favoritos</h2>
+                </div>
+                
+                <div class="card">
+                    <h3 class="text-bold mb-2">📦 Produtos Favoritos (${favoriteProducts.length})</h3>
+                    ${favoriteProducts.length > 0 ? `
+                        <div class="grid">
+                            ${favoriteProducts.map(product => `
+                                <div class="marketplace-product-card" onclick="viewProduct(${product.id})">
+                                    ${product.image ? 
+                                        `<img src="${product.image}" alt="${product.name}" class="product-image">` :
+                                        `<div class="product-image-placeholder">📦</div>`
+                                    }
+                                    <div class="product-info">
+                                        <h4 class="text-bold">${product.name}</h4>
+                                        <p class="text-grey text-small">${product.price}</p>
+                                        <p class="text-grey text-small">${product.condition}</p>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : '<p class="text-grey text-center">Ainda não tem produtos favoritos.</p>'}
+                </div>
+                
+                <div class="card">
+                    <h3 class="text-bold mb-2">📚 Explicações Favoritas (${favoriteExplanations.length})</h3>
+                    ${favoriteExplanations.length > 0 ? `
+                        <div class="grid">
+                            ${favoriteExplanations.map(explanation => `
+                                <div class="card" onclick="viewExplanation(${explanation.id})">
+                                    <h3 class="text-bold mb-1">${explanation.subject}</h3>
+                                    <p class="text-grey mb-1">${explanation.tutor}</p>
+                                    <p class="text-grey text-small mb-1">${explanation.level}</p>
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <span style="font-size: 1.25rem; font-weight: 600; color: var(--color-purple);">${explanation.price}</span>
+                                        <span style="color: var(--color-orange);">${explanation.rating}</span>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : '<p class="text-grey text-center">Ainda não tem explicações favoritas.</p>'}
+                </div>
+            `;
+        }
+        
+        function renderMyProductsPage() {
+            const myProducts = mockData.products.filter(p => p.sellerId === currentUser.id);
+            
+            return `
+                <div class="page-header">
+                    <h2>📦 Os Meus Produtos</h2>
+                </div>
+                
+                ${myProducts.length > 0 ? `
+                    <div class="grid">
+                        ${myProducts.map(product => `
+                            <div class="marketplace-product-card" onclick="viewProduct(${product.id})">
+                                ${product.image ? 
+                                    `<img src="${product.image}" alt="${product.name}" class="product-image">` :
+                                    `<div class="product-image-placeholder">📦</div>`
+                                }
+                                <div class="product-info">
+                                    <h4 class="text-bold">${product.name}</h4>
+                                    <p class="text-grey text-small">${product.price}</p>
+                                    <p class="text-grey text-small">${product.condition}</p>
+                                    <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+                                        <span class="text-small">👁️ ${product.views}</span>
+                                        <span class="text-small">❤️ ${product.likes || 0}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                ` : `
+                    <div class="card text-center">
+                        <div style="font-size: 4rem; margin-bottom: 1rem;">📦</div>
+                        <h3 class="text-bold mb-1">Ainda não publicou produtos</h3>
+                        <p class="text-grey mb-2">Comece a vender na Loja!</p>
+                        <button class="btn btn-red" onclick="navigateTo('loja'); setTimeout(() => addProduct(), 500);">
+                            ➕ Publicar Primeiro Produto
+                        </button>
+                    </div>
+                `}
+            `;
+        }
+        
+        function renderMyExplanationsPage() {
+            const myExplanations = mockData.explanations.filter(e => e.tutorId === currentUser.id);
+            
+            return `
+                <div class="page-header">
+                    <h2>📚 As Minhas Explicações</h2>
+                </div>
+                
+                ${myExplanations.length > 0 ? `
+                    <div class="grid">
+                        ${myExplanations.map(explanation => `
+                            <div class="card" onclick="viewExplanation(${explanation.id})">
+                                <h3 class="text-bold mb-1">${explanation.subject}</h3>
+                                <p class="text-grey mb-1">${explanation.level}</p>
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                                    <span style="font-size: 1.25rem; font-weight: 600; color: var(--color-purple);">${explanation.price}</span>
+                                    <span style="color: var(--color-orange);">${explanation.rating}</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--color-text-secondary);">
+                                    <span>👥 ${explanation.students || 0} alunos</span>
+                                    <span>⭐ ${explanation.reviews || 0} avaliações</span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                ` : `
+                    <div class="card text-center">
+                        <div style="font-size: 4rem; margin-bottom: 1rem;">📚</div>
+                        <h3 class="text-bold mb-1">Ainda não ofereceu explicações</h3>
+                        <p class="text-grey mb-2">Comece a ajudar outros estudantes!</p>
+                        <button class="btn btn-purple" onclick="navigateTo('loja'); setTimeout(() => addExplanation(), 500);">
+                            ➕ Oferecer Primeira Explicação
+                        </button>
+                    </div>
+                `}
+            `;
+        }
+        
+        function renderMyHistoryPage() {
+            const history = window.userHistory || { purchases: [], sales: [], explanations: [] };
+            
+            return `
+                <div class="page-header">
+                    <h2>📊 O Meu Histórico</h2>
+                </div>
+                
+                <div class="card">
+                    <h3 class="text-bold mb-2">🛒 Compras (${history.purchases?.length || 0})</h3>
+                    ${history.purchases && history.purchases.length > 0 ? `
+                        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                            ${history.purchases.slice().reverse().map(purchase => `
+                                <div style="padding: 0.75rem; background: var(--color-bg-secondary); border-radius: 8px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <div>
+                                            <strong>${purchase.productName}</strong>
+                                            <p class="text-small text-grey">Vendedor: ${purchase.seller} • ${purchase.price}</p>
+                                        </div>
+                                        <span class="text-small text-grey">${new Date(purchase.date).toLocaleDateString('pt-PT')}</span>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : '<p class="text-grey text-center">Ainda não realizou compras.</p>'}
+                </div>
+                
+                <div class="card">
+                    <h3 class="text-bold mb-2">📦 Vendas (${history.sales?.length || 0})</h3>
+                    ${history.sales && history.sales.length > 0 ? `
+                        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                            ${history.sales.slice().reverse().map(sale => `
+                                <div style="padding: 0.75rem; background: var(--color-bg-secondary); border-radius: 8px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <div>
+                                            <strong>${sale.productName}</strong>
+                                            <p class="text-small text-grey">${sale.sold ? '✅ Vendido' : '⏳ À venda'} • ${sale.soldDate ? new Date(sale.soldDate).toLocaleDateString('pt-PT') : new Date(sale.date).toLocaleDateString('pt-PT')}</p>
+                                        </div>
+                                        ${sale.sold ? '<span style="color: var(--color-success);">✓</span>' : ''}
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : '<p class="text-grey text-center">Ainda não publicou produtos.</p>'}
+                </div>
+                
+                <div class="card">
+                    <h3 class="text-bold mb-2">📚 Explicações (${history.explanations?.length || 0})</h3>
+                    ${history.explanations && history.explanations.length > 0 ? `
+                        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                            ${history.explanations.slice().reverse().map(expl => `
+                                <div style="padding: 0.75rem; background: var(--color-bg-secondary); border-radius: 8px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <div>
+                                            <strong>${expl.subject}</strong>
+                                            <p class="text-small text-grey">Publicado em ${new Date(expl.date).toLocaleDateString('pt-PT')}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : '<p class="text-grey text-center">Ainda não ofereceu explicações.</p>'}
+                </div>
+            `;
+        }
+        
+        function renderCartPage() {
+            const cart = window.shoppingCart || { products: [], explanations: [] };
+            const totals = calculateCartTotal();
+            const hasItems = (cart.products?.length || 0) + (cart.explanations?.length || 0) > 0;
+            
+            return `
+                <div class="page-header">
+                    <h2>🛒 Carrinho de Compras</h2>
+                </div>
+                
+                ${!hasItems ? `
+                    <div class="card text-center">
+                        <div style="font-size: 4rem; margin-bottom: 1rem;">🛒</div>
+                        <h3 class="text-bold mb-1">O seu carrinho está vazio</h3>
+                        <p class="text-grey mb-2">Adicione produtos e explicações ao carrinho para continuar!</p>
+                        <button class="btn btn-primary" onclick="navigateTo('loja')">
+                            🛍️ Continuar a Comprar
+                        </button>
+                    </div>
+                ` : `
+                    <div class="card">
+                        <h3 class="text-bold mb-2">📦 Produtos (${cart.products?.length || 0})</h3>
+                        ${cart.products && cart.products.length > 0 ? `
+                            <div style="display: flex; flex-direction: column; gap: 1rem;">
+                                ${cart.products.map(product => `
+                                    <div style="display: flex; gap: 1rem; padding: 1rem; background: var(--color-bg-secondary); border-radius: 10px; align-items: center;">
+                                        ${product.image ? 
+                                            `<img src="${product.image}" alt="${product.name}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px;">` :
+                                            `<div style="width: 80px; height: 80px; background: var(--color-surface); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 2rem;">📦</div>`
+                                        }
+                                        <div style="flex: 1;">
+                                            <h4 class="text-bold mb-0.5">${product.name}</h4>
+                                            <p class="text-small text-grey mb-0.5">${product.condition} • Vendedor: ${product.seller}</p>
+                                            <p class="text-bold" style="color: var(--color-red); font-size: 1.1rem;">${product.price}</p>
+                                        </div>
+                                        <button class="btn btn-red" style="padding: 0.5rem;" onclick="removeProductFromCart(${product.id})" aria-label="Remover do carrinho">
+                                            🗑️
+                                        </button>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--color-border);">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <strong>Subtotal Produtos:</strong>
+                                    <span style="font-size: 1.2rem; font-weight: bold; color: var(--color-red);">${totals.products.toFixed(2)}€</span>
+                                </div>
+                            </div>
+                        ` : '<p class="text-grey text-center">Nenhum produto no carrinho.</p>'}
+                    </div>
+                    
+                    <div class="card">
+                        <h3 class="text-bold mb-2">📚 Explicações (${cart.explanations?.length || 0})</h3>
+                        ${cart.explanations && cart.explanations.length > 0 ? `
+                            <div style="display: flex; flex-direction: column; gap: 1rem;">
+                                ${cart.explanations.map(explanation => `
+                                    <div style="display: flex; gap: 1rem; padding: 1rem; background: var(--color-bg-secondary); border-radius: 10px; align-items: center;">
+                                        <div style="width: 80px; height: 80px; background: var(--color-purple); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: white;">📚</div>
+                                        <div style="flex: 1;">
+                                            <h4 class="text-bold mb-0.5">${explanation.subject}</h4>
+                                            <p class="text-small text-grey mb-0.5">${explanation.level} • Tutor: ${explanation.tutor}</p>
+                                            <p class="text-bold" style="color: var(--color-purple); font-size: 1.1rem;">${explanation.price}</p>
+                                        </div>
+                                        <button class="btn btn-red" style="padding: 0.5rem;" onclick="removeExplanationFromCart(${explanation.id})" aria-label="Remover do carrinho">
+                                            🗑️
+                                        </button>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--color-border);">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <strong>Subtotal Explicações:</strong>
+                                    <span style="font-size: 1.2rem; font-weight: bold; color: var(--color-purple);">${totals.explanations.toFixed(2)}€</span>
+                                </div>
+                            </div>
+                        ` : '<p class="text-grey text-center">Nenhuma explicação no carrinho.</p>'}
+                    </div>
+                    
+                    <div class="card" style="background: linear-gradient(135deg, var(--color-blue-dark), var(--color-purple)); color: white;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h3 class="text-bold" style="color: white;">Total:</h3>
+                            <span style="font-size: 1.8rem; font-weight: bold;">${totals.total.toFixed(2)}€</span>
+                        </div>
+                        <button class="btn" style="width: 100%; background: white; color: var(--color-blue-dark); font-weight: bold; padding: 1rem; font-size: 1.1rem;" onclick="checkout()">
+                            💳 Finalizar Compra
+                        </button>
+                    </div>
+                    
+                    <button class="btn btn-grey" style="width: 100%; margin-top: 0.5rem;" onclick="navigateTo('loja')">
+                        ➕ Continuar a Comprar
+                    </button>
+                `}
+            `;
+        }
+        
+        function checkout() {
+            const cart = window.shoppingCart || { products: [], explanations: [] };
+            const totals = calculateCartTotal();
+            
+            if (totals.total === 0) {
+                showNotification('Carrinho Vazio', 'Adicione itens ao carrinho antes de finalizar a compra.', 'info');
+                return;
+            }
+            
+            // Simulate checkout process
+            const modalContent = `
+                <div style="text-align: center; margin-bottom: 1.5rem;">
+                    <div style="font-size: 4rem; margin-bottom: 1rem;">💳</div>
+                    <h3 class="text-bold mb-1">Finalizar Compra</h3>
+                    <p class="text-grey">Total: <strong style="font-size: 1.5rem; color: var(--color-blue-dark);">${totals.total.toFixed(2)}€</strong></p>
+                </div>
+                
+                <div style="text-align: left; margin-bottom: 1.5rem;">
+                    <h4 class="text-bold mb-1">Resumo da Compra:</h4>
+                    <div style="background: var(--color-bg-secondary); padding: 1rem; border-radius: 8px;">
+                        <p class="mb-0.5"><strong>Produtos:</strong> ${cart.products?.length || 0} item(s) - ${totals.products.toFixed(2)}€</p>
+                        <p class="mb-0.5"><strong>Explicações:</strong> ${cart.explanations?.length || 0} item(s) - ${totals.explanations.toFixed(2)}€</p>
+                        <div style="margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid var(--color-border);">
+                            <p class="mb-0"><strong>Total:</strong> ${totals.total.toFixed(2)}€</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 1rem;">
+                    <label class="text-bold mb-0.5">Método de Pagamento:</label>
+                    <select id="paymentMethod" class="select-field">
+                        <option value="card">💳 Cartão de Crédito/Débito</option>
+                        <option value="mbway">📱 MB Way</option>
+                        <option value="transfer">🏦 Transferência Bancária</option>
+                        <option value="cash">💵 Pagamento em Mão</option>
+                    </select>
+                </div>
+                
+                <div style="display: flex; gap: 0.5rem;">
+                    <button class="btn btn-primary" style="flex: 1;" onclick="confirmCheckout()">
+                        ✅ Confirmar Compra
+                    </button>
+                    <button class="btn btn-grey" style="flex: 1;" onclick="closeModal()">
+                        ✖️ Cancelar
+                    </button>
+                </div>
+            `;
+            
+            showModal(createModal('Checkout', modalContent));
+        }
+        
+        function confirmCheckout() {
+            const cart = window.shoppingCart || { products: [], explanations: [] };
+            const paymentMethod = document.getElementById('paymentMethod')?.value || 'card';
+            const totals = calculateCartTotal();
+            
+            if (!window.userHistory) window.userHistory = { purchases: [], sales: [], explanations: [] };
+            
+            // Add products to purchase history
+            cart.products?.forEach(product => {
+                window.userHistory.purchases.push({
+                    productId: product.id,
+                    productName: product.name,
+                    seller: product.seller,
+                    price: product.price,
+                    date: new Date().toISOString(),
+                    paymentMethod: paymentMethod
+                });
+            });
+            
+            // Add explanations to history
+            cart.explanations?.forEach(explanation => {
+                // Could add to a separate explanations history if needed
+            });
+            
+            saveHistory();
+            
+            // Clear cart
+            window.shoppingCart = { products: [], explanations: [] };
+            saveCart();
+            
+            // Update cart icon immediately
+            updateCartIcon();
+            
+            // Add points
+            addPoints(30, 'Finalizou uma compra');
+            
+            closeModal();
+            
+            // If on cart page, update it immediately to show empty state
+            if (currentPage === 'cart') {
+                renderPage();
+                showNotification('Compra Realizada!', `Compra de ${totals.total.toFixed(2)}€ realizada com sucesso! O carrinho foi limpo.`, 'success');
+            } else {
+                // Navigate to cart to show empty state
+                navigateTo('cart');
+                setTimeout(() => {
+                    showNotification('Compra Realizada!', `Compra de ${totals.total.toFixed(2)}€ realizada com sucesso!`, 'success');
+                }, 300);
             }
         }
         
@@ -6509,6 +8103,9 @@
             if (currentPage && currentPage !== page) {
                 localStorage.setItem('nexus_previous_page', currentPage);
             }
+            
+            // Close sidebar when navigating
+            closeSidebar();
             
             currentPage = page;
             const header = document.getElementById('appHeader');
@@ -6531,8 +8128,11 @@
             renderPage();
             updateFAB();
             
-            // Scroll to top
-            document.getElementById('appContent').scrollTop = 0;
+            // Scroll to top smoothly
+            document.getElementById('appContent').scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
         }
         
         // Function to get logo image src
@@ -6545,6 +8145,18 @@
         
         // === INITIALIZATION ===
         document.addEventListener('DOMContentLoaded', function() {
+            // Initialize data from localStorage
+            initializeData();
+            
+            // Request notification permission
+            if ('Notification' in window && Notification.permission === 'default') {
+                Notification.requestPermission();
+            }
+            
+            // Check reminders periodically
+            checkReminders();
+            setInterval(checkReminders, 60000); // Check every minute
+            
             // Load logo into sidebar
             function loadSidebarLogo() {
                 const sidebarLogo = document.getElementById('sidebarLogo');
@@ -6558,6 +8170,9 @@
             
             // Load logo after renderLoginPage is available
             setTimeout(loadSidebarLogo, 100);
+            
+            // Initialize cart icon
+            setTimeout(updateCartIcon, 200);
             
             // Check for saved user data
             const savedUser = localStorage.getItem('nexusUser');
@@ -6596,6 +8211,13 @@
         // Enhanced keyboard navigation
         document.addEventListener('keydown', function(event) {
             if (event.key === 'Escape') {
+                // Close sidebar if open
+                const sidebar = document.getElementById('sidebar');
+                if (sidebar && sidebar.classList.contains('open')) {
+                    closeSidebar();
+                    return;
+                }
+                // Otherwise close modal
                 closeModal();
             }
         });
