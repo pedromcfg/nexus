@@ -2829,7 +2829,7 @@
     <script>
         // === GLOBAL STATE ===
         let currentPage = 'login';
-        let selectedRole = 'Aluno';
+        let selectedRole = 'aluno';
         let tempRegistration = {};
         let currentUser = {
             isLoggedIn: false,
@@ -3963,8 +3963,8 @@
         function selectRole(role) {
             selectedRole = role;
             
-            // Remove selection from all items
-            ['Aluno', 'Professor', 'encarregado'].forEach(r => {
+            // Remove selection from all items - usar os IDs corretos do HTML
+            ['aluno', 'professor', 'encarregado'].forEach(r => {
                 const item = document.getElementById(`role-${r}`);
                 const checkbox = document.getElementById(`checkbox-${r}`);
                 if (item && checkbox) {
@@ -6791,10 +6791,14 @@
                 
                 const schools = schoolsByRegionAndLevel[selectedRegion][selectedLevel];
                 
-                // Substituir o select por um campo de pesquisa
-                const schoolContainer = schoolSelect.parentElement;
-                schoolContainer.innerHTML = `
-                    <div class="school-search-container">
+                // Verificar se já existe o campo de pesquisa (para não recriar)
+                let schoolSearchContainer = document.querySelector('.school-search-container');
+                
+                if (!schoolSearchContainer) {
+                    // Substituir apenas o select por um campo de pesquisa
+                    const searchContainer = document.createElement('div');
+                    searchContainer.className = 'school-search-container';
+                    searchContainer.innerHTML = `
                         <input type="text" id="schoolSearchInput" class="input-field" 
                                placeholder="🔍 Pesquisar escola..." 
                                onkeyup="filterSchools('${selectedRegion}', '${selectedLevel}')"
@@ -6804,7 +6808,7 @@
                         <input type="hidden" id="regSchool" name="regSchool">
                         <div id="schoolDropdown" class="school-dropdown" style="display: none;">
                             ${schools.map(school => `
-                                <div class="school-option" onclick="selectSchool('${school}')"
+                                <div class="school-option" onclick="selectSchool('${school.replace(/'/g, "\\'")}')"
                                      onmousedown="event.preventDefault();">
                                     ${school}
                                 </div>
@@ -6813,23 +6817,57 @@
                         <div class="text-grey text-small mt-1">
                             ${schools.length} escola${schools.length !== 1 ? 's' : ''} disponível${schools.length !== 1 ? 'is' : ''} em ${selectedLevel}
                         </div>
-                    </div>
-                `;
-                
-            } else if (selectedRegion && !selectedLevel) {
-                // Se só região foi selecionada, mostrar mensagem para selecionar nível
-                schoolSelect.innerHTML = '<option value="">Selecione primeiro o nível de ensino</option>';
-                schoolSelect.disabled = true;
-                
-            } else if (!selectedRegion && selectedLevel) {
-                // Se só nível foi selecionado, mostrar mensagem para selecionar região
-                schoolSelect.innerHTML = '<option value="">Selecione primeiro a região</option>';
-                schoolSelect.disabled = true;
+                    `;
+                    schoolSelect.replaceWith(searchContainer);
+                } else {
+                    // Atualizar apenas o dropdown de escolas
+                    const dropdown = document.getElementById('schoolDropdown');
+                    if (dropdown) {
+                        dropdown.innerHTML = schools.map(school => `
+                            <div class="school-option" onclick="selectSchool('${school.replace(/'/g, "\\'")}')"
+                                 onmousedown="event.preventDefault();">
+                                ${school}
+                            </div>
+                        `).join('');
+                    }
+                }
                 
             } else {
-                // Se nenhum ou ambos estão vazios
-                schoolSelect.innerHTML = '<option value="">Selecione região e nível de ensino</option>';
-                schoolSelect.disabled = true;
+                // Se região ou nível não estão selecionados, restaurar o select original
+                const schoolSearchContainer = document.querySelector('.school-search-container');
+                if (schoolSearchContainer) {
+                    // Restaurar o select
+                    const restoredSelect = document.createElement('select');
+                    restoredSelect.id = 'regSchool';
+                    restoredSelect.className = 'select-field';
+                    
+                    if (selectedRegion && !selectedLevel) {
+                        restoredSelect.innerHTML = '<option value="">Selecione primeiro o nível de ensino</option>';
+                    } else if (!selectedRegion && selectedLevel) {
+                        restoredSelect.innerHTML = '<option value="">Selecione primeiro a região</option>';
+                    } else {
+                        restoredSelect.innerHTML = '<option value="">Selecione região e nível de ensino</option>';
+                    }
+                    
+                    restoredSelect.disabled = true;
+                    schoolSearchContainer.replaceWith(restoredSelect);
+                } else if (schoolSelect) {
+                    // Se o select ainda existe, apenas atualizar
+                    if (selectedRegion && !selectedLevel) {
+                        schoolSelect.innerHTML = '<option value="">Selecione primeiro o nível de ensino</option>';
+                    } else if (!selectedRegion && selectedLevel) {
+                        schoolSelect.innerHTML = '<option value="">Selecione primeiro a região</option>';
+                    } else {
+                        schoolSelect.innerHTML = '<option value="">Selecione região e nível de ensino</option>';
+                    }
+                    schoolSelect.disabled = true;
+                }
+                
+                // Esconder o botão Continuar
+                const continueBtn = document.getElementById('btnContinueAfterSchool');
+                if (continueBtn) {
+                    continueBtn.style.display = 'none';
+                }
             }
         }
         
@@ -6914,22 +6952,62 @@
         }
         
         function proceedToStep3() {
-            const region = document.getElementById('regRegion').value;
-            const level = document.getElementById('regLevel').value;
-            const school = document.getElementById('regSchool').value;
+            const region = document.getElementById('regRegion')?.value || '';
+            const level = document.getElementById('regLevel')?.value || '';
+            
+            // Get school value - can be from select or hidden input
+            let school = '';
+            const schoolSelect = document.getElementById('regSchool');
+            if (schoolSelect) {
+                if (schoolSelect.tagName === 'SELECT') {
+                    school = schoolSelect.value;
+                } else if (schoolSelect.tagName === 'INPUT') {
+                    school = schoolSelect.value;
+                }
+            }
+            
+            // Also check the search input if it exists
+            const schoolSearchInput = document.getElementById('schoolSearchInput');
+            if (schoolSearchInput && schoolSearchInput.value) {
+                school = schoolSearchInput.value;
+            }
             
             let isValid = true;
             
-            isValid &= validateField('regRegion', region, (val) => val !== '', 'Por favor, selecione a região.');
-            isValid &= validateField('regLevel', level, (val) => val !== '', 'Por favor, selecione o nível de ensino.');
-            isValid &= validateField('regSchool', school, (val) => val !== '', 'Por favor, selecione a escola.');
+            if (!region) {
+                isValid = false;
+                const regionField = document.getElementById('regRegion');
+                if (regionField) {
+                    regionField.style.borderColor = 'var(--color-error)';
+                }
+            }
             
-            if (!isValid) return;
+            if (!level) {
+                isValid = false;
+                const levelField = document.getElementById('regLevel');
+                if (levelField) {
+                    levelField.style.borderColor = 'var(--color-error)';
+                }
+            }
+            
+            if (!school) {
+                isValid = false;
+                const schoolField = document.getElementById('regSchool') || document.getElementById('schoolSearchInput');
+                if (schoolField) {
+                    schoolField.style.borderColor = 'var(--color-error)';
+                }
+            }
+            
+            if (!isValid) {
+                // Show error message
+                alert('Por favor, preencha todos os campos: região, nível de ensino e escola.');
+                return;
+            }
             
             // Store temporary registration data
             tempRegistration = {
-                role: tempRegistration.role, // Keep from step 1
-                email: tempRegistration.email, // Keep from step 1
+                role: tempRegistration.role || '', // Keep from step 1
+                email: tempRegistration.email || '', // Keep from step 1
                 region,
                 level,
                 school
@@ -7112,7 +7190,7 @@
             };
             currentChat = null;
             uploadedImages = [];
-            selectedRole = 'Aluno';
+            selectedRole = 'aluno';
             tempRegistration = {};
             
             navigateTo('login');
@@ -7638,7 +7716,7 @@
                 case 'createAccount1':
                     content.innerHTML = renderCreateAccount1Page();
                     // Set default selection after rendering
-                    setTimeout(() => selectRole('Aluno'), 100);
+                    setTimeout(() => selectRole('aluno'), 100);
                     break;
                 case 'validation':
                     content.innerHTML = renderValidationPage();

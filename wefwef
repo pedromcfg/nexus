@@ -1,0 +1,47 @@
+## Resumo das alterações — NEXUS
+
+### Correções
+- Modo escuro corrigido — todos os elementos adaptam-se corretamente
+- Scroll nos modais corrigido — é possível fazer scroll quando o conteúdo é grande
+- Menu lateral fecha automaticamente ao selecionar um item
+
+### Novas funcionalidades
+
+1. Carrinho de compras
+   - Adicionar produtos e explicações ao carrinho
+   - Ver total antes de comprar
+   - Finalizar compra com diferentes métodos de pagamento
+   - Carrinho limpo automaticamente após compra
+
+2. Favoritos
+   - Favoritar produtos e explicações
+   - Ver todos os favoritos numa página
+
+3. Histórico pessoal
+   - Ver produtos publicados
+   - Ver explicações oferecidas
+   - Ver histórico de compras
+
+4. Comentários e avaliações
+   - Comentar produtos
+   - Avaliar explicações (1-5 estrelas)
+
+5. Sistema de pontos
+   - Ganhar pontos por ações (publicar, comprar, favoritar, etc.)
+   - Desbloquear conquistas
+   - Ver pontos e conquistas no perfil
+
+6. Lembretes da agenda
+   - Notificações automáticas para trabalhos de casa
+   - Lembretes 1 hora antes dos eventos
+
+7. Pesquisa melhorada
+   - Histórico de pesquisas recentes
+   - Pesquisas guardadas
+
+### Melhorias gerais
+- Dados guardados — tudo persiste após recarregar a página
+- Interface mais rápida e suave
+- Melhor organização e navegação
+
+Total: 7 novas funcionalidades principais + várias melhorias.
