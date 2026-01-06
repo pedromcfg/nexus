@@ -3192,12 +3192,21 @@
                 window.searchHistory = [];
             }
             
-            // Load shopping cart
+            // Load shopping cart (only products now, no explanations)
             const savedCart = localStorage.getItem('nexus_cart');
             if (savedCart) {
-                window.shoppingCart = JSON.parse(savedCart);
+                const cart = JSON.parse(savedCart);
+                window.shoppingCart = { products: cart.products || [], explanations: [] };
             } else {
                 window.shoppingCart = { products: [], explanations: [] };
+            }
+            
+            // Load explanation bookings and proposals
+            const savedBookings = localStorage.getItem('nexus_explanation_bookings');
+            if (savedBookings) {
+                window.explanationBookings = JSON.parse(savedBookings);
+            } else {
+                window.explanationBookings = { bookings: [], proposals: [] };
             }
         }
         
@@ -3242,10 +3251,15 @@
             updateCartIcon();
         }
         
-        // Get cart item count
+        // Save explanation bookings and proposals to localStorage
+        function saveBookings() {
+            localStorage.setItem('nexus_explanation_bookings', JSON.stringify(window.explanationBookings));
+        }
+        
+        // Get cart item count (only products now)
         function getCartItemCount() {
             if (!window.shoppingCart) return 0;
-            return (window.shoppingCart.products?.length || 0) + (window.shoppingCart.explanations?.length || 0);
+            return window.shoppingCart.products?.length || 0;
         }
         
         // Update cart icon badge
@@ -3291,31 +3305,7 @@
             showNotification('Adicionado ao Carrinho', `${product.name} foi adicionado ao carrinho!`, 'success');
         }
         
-        // Add explanation to cart
-        function addExplanationToCart(explanationId) {
-            const explanation = mockData.explanations.find(e => e.id === explanationId);
-            if (!explanation) return;
-            
-            if (!window.shoppingCart) window.shoppingCart = { products: [], explanations: [] };
-            if (!window.shoppingCart.explanations) window.shoppingCart.explanations = [];
-            
-            // Check if already in cart
-            if (window.shoppingCart.explanations.find(e => e.id === explanationId)) {
-                showNotification('Explicação já no carrinho', 'Esta explicação já está no seu carrinho!', 'info');
-                return;
-            }
-            
-            window.shoppingCart.explanations.push({
-                id: explanation.id,
-                subject: explanation.subject,
-                price: explanation.price,
-                tutor: explanation.tutor,
-                level: explanation.level
-            });
-            
-            saveCart();
-            showNotification('Adicionado ao Carrinho', `Explicação de ${explanation.subject} foi adicionada ao carrinho!`, 'success');
-        }
+        // Removed: addExplanationToCart - explanations are now booked/proposed, not added to cart
         
         // Remove product from cart
         function removeProductFromCart(productId) {
@@ -3331,26 +3321,13 @@
             }
         }
         
-        // Remove explanation from cart
-        function removeExplanationFromCart(explanationId) {
-            if (!window.shoppingCart || !window.shoppingCart.explanations) return;
-            
-            const index = window.shoppingCart.explanations.findIndex(e => e.id === explanationId);
-            if (index > -1) {
-                window.shoppingCart.explanations.splice(index, 1);
-                saveCart();
-                if (currentPage === 'cart') {
-                    renderPage();
-                }
-            }
-        }
+        // Removed: removeExplanationFromCart - explanations are no longer in cart
         
-        // Calculate cart total
+        // Calculate cart total (only products now)
         function calculateCartTotal() {
-            if (!window.shoppingCart) return { products: 0, explanations: 0, total: 0 };
+            if (!window.shoppingCart) return { products: 0, total: 0 };
             
             let productsTotal = 0;
-            let explanationsTotal = 0;
             
             window.shoppingCart.products?.forEach(product => {
                 // Extract price - handles formats like "25€", "25,50€", "25.50€"
@@ -3359,17 +3336,9 @@
                 if (!isNaN(price)) productsTotal += price;
             });
             
-            window.shoppingCart.explanations?.forEach(explanation => {
-                // Extract price - handles formats like "15€/hora", "15,50€/hora"
-                const priceStr = explanation.price.toString().replace(/[^\d,.]/g, '').replace(',', '.');
-                const price = parseFloat(priceStr);
-                if (!isNaN(price)) explanationsTotal += price;
-            });
-            
             return {
                 products: productsTotal,
-                explanations: explanationsTotal,
-                total: productsTotal + explanationsTotal
+                total: productsTotal
             };
         }
         
@@ -3819,7 +3788,8 @@
                 { id: 'loja', icon: '🛍️', label: 'Loja' },
                 { id: 'resources', icon: '📚', label: 'Recursos' },
                 { id: 'agenda', icon: '📅', label: 'Agenda' },
-                { id: 'chat', icon: '💬', label: 'Chat' }
+                { id: 'chat', icon: '💬', label: 'Chat' },
+                { id: 'myExplanations', icon: '📖', label: 'Minhas Explicações' }
             ];
             
             return navItems.map(item => `
@@ -4905,13 +4875,17 @@
                 </div>
                 
                 <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
-                    <button class="btn btn-purple" style="flex: 1;" onclick="addExplanationToCart(${id}); closeModal();">
-                        🛒 Adicionar ao Carrinho
+                    <button class="btn btn-purple" style="flex: 1;" onclick="openBookingModal(${id})">
+                        📅 Agendar Explicação
                     </button>
-                    <button class="btn btn-orange" style="flex: 1;" onclick="contactTutor(${id})">
-                        💬 Contactar
+                    <button class="btn btn-orange" style="flex: 1;" onclick="openProposalModal(${id})">
+                        💼 Enviar Proposta
                     </button>
                 </div>
+                <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+                    <button class="btn btn-grey" style="flex: 1;" onclick="contactTutor(${id})">
+                        💬 Contactar
+                    </button>
                 <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
                     <button class="btn" id="favoriteExplanationBtn${id}" style="flex: 1;" onclick="toggleFavoriteExplanation(${id})">
                         🤍 Adicionar aos Favoritos
@@ -7298,6 +7272,233 @@
             setTimeout(() => openChat(chat.id), 100);
         }
         
+        // === EXPLANATION BOOKING SYSTEM ===
+        
+        function openBookingModal(explanationId) {
+            const explanation = mockData.explanations.find(e => e.id === explanationId);
+            if (!explanation) return;
+            
+            const today = new Date().toISOString().split('T')[0];
+            const maxDate = new Date();
+            maxDate.setMonth(maxDate.getMonth() + 3);
+            const maxDateStr = maxDate.toISOString().split('T')[0];
+            
+            const modalContent = `
+                <div style="text-align: center; margin-bottom: 1.5rem;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">📅</div>
+                    <h3 class="text-bold mb-1">Agendar Explicação</h3>
+                    <p class="text-grey mb-1">${explanation.subject} com ${explanation.tutor}</p>
+                    <p class="text-small text-grey">Preço: ${explanation.price}</p>
+                </div>
+                
+                <div style="margin-bottom: 1rem;">
+                    <label class="text-bold mb-0.5">📅 Data:</label>
+                    <input type="date" id="bookingDate${explanationId}" class="input-field" min="${today}" max="${maxDateStr}" required>
+                </div>
+                
+                <div style="margin-bottom: 1rem;">
+                    <label class="text-bold mb-0.5">🕐 Hora:</label>
+                    <input type="time" id="bookingTime${explanationId}" class="input-field" required>
+                </div>
+                
+                <div style="margin-bottom: 1rem;">
+                    <label class="text-bold mb-0.5">⏱️ Duração:</label>
+                    <select id="bookingDuration${explanationId}" class="select-field">
+                        <option value="30">30 minutos</option>
+                        <option value="60" selected>1 hora</option>
+                        <option value="90">1 hora e 30 minutos</option>
+                        <option value="120">2 horas</option>
+                    </select>
+                </div>
+                
+                <div style="margin-bottom: 1rem;">
+                    <label class="text-bold mb-0.5">📝 Assunto/Tópico:</label>
+                    <input type="text" id="bookingTopic${explanationId}" class="input-field" placeholder="Ex: Equações do 2º grau, Fotosíntese, etc.">
+                </div>
+                
+                <div style="margin-bottom: 1rem;">
+                    <label class="text-bold mb-0.5">💬 Mensagem (opcional):</label>
+                    <textarea id="bookingMessage${explanationId}" class="input-field" placeholder="Adicione uma mensagem para o tutor..." style="height: 80px; resize: vertical;"></textarea>
+                </div>
+                
+                <div style="display: flex; gap: 0.5rem;">
+                    <button class="btn btn-primary" style="flex: 1;" onclick="submitBooking(${explanationId})">
+                        ✅ Confirmar Agendamento
+                    </button>
+                    <button class="btn btn-grey" style="flex: 1;" onclick="closeModal()">
+                        ✖️ Cancelar
+                    </button>
+                </div>
+            `;
+            
+            showModal(createModal('Agendar Explicação', modalContent));
+        }
+        
+        function submitBooking(explanationId) {
+            const explanation = mockData.explanations.find(e => e.id === explanationId);
+            if (!explanation) return;
+            
+            const date = document.getElementById(`bookingDate${explanationId}`)?.value;
+            const time = document.getElementById(`bookingTime${explanationId}`)?.value;
+            const duration = document.getElementById(`bookingDuration${explanationId}`)?.value;
+            const topic = document.getElementById(`bookingTopic${explanationId}`)?.value;
+            const message = document.getElementById(`bookingMessage${explanationId}`)?.value;
+            
+            if (!date || !time) {
+                showNotification('Campos Obrigatórios', 'Por favor, preencha a data e hora.', 'error');
+                return;
+            }
+            
+            if (!window.explanationBookings) window.explanationBookings = { bookings: [], proposals: [] };
+            if (!window.explanationBookings.bookings) window.explanationBookings.bookings = [];
+            
+            const booking = {
+                id: Date.now(),
+                explanationId: explanationId,
+                explanationSubject: explanation.subject,
+                tutor: explanation.tutor,
+                tutorId: explanation.tutorId,
+                studentId: currentUser.id,
+                studentName: currentUser.name,
+                date: date,
+                time: time,
+                duration: parseInt(duration),
+                topic: topic || '',
+                message: message || '',
+                status: 'pending', // pending, confirmed, rejected, completed, cancelled
+                createdAt: new Date().toISOString()
+            };
+            
+            window.explanationBookings.bookings.push(booking);
+            saveBookings();
+            
+            closeModal();
+            showNotification('Agendamento Enviado', `O seu agendamento foi enviado para ${explanation.tutor}. Aguarde confirmação.`, 'success');
+            
+            // Add points
+            addPoints(5, 'Agendou uma explicação');
+        }
+        
+        function openProposalModal(explanationId) {
+            const explanation = mockData.explanations.find(e => e.id === explanationId);
+            if (!explanation) return;
+            
+            // Extract base price from explanation.price (e.g., "15€/hora" -> 15)
+            const basePrice = parseFloat(explanation.price.toString().replace(/[^\d,.]/g, '').replace(',', '.')) || 0;
+            
+            const today = new Date().toISOString().split('T')[0];
+            const maxDate = new Date();
+            maxDate.setMonth(maxDate.getMonth() + 3);
+            const maxDateStr = maxDate.toISOString().split('T')[0];
+            
+            const modalContent = `
+                <div style="text-align: center; margin-bottom: 1.5rem;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">💼</div>
+                    <h3 class="text-bold mb-1">Enviar Proposta</h3>
+                    <p class="text-grey mb-1">${explanation.subject} com ${explanation.tutor}</p>
+                    <p class="text-small text-grey">Preço sugerido: ${explanation.price}</p>
+                </div>
+                
+                <div style="margin-bottom: 1rem;">
+                    <label class="text-bold mb-0.5">📅 Data Desejada:</label>
+                    <input type="date" id="proposalDate${explanationId}" class="input-field" min="${today}" max="${maxDateStr}" required>
+                </div>
+                
+                <div style="margin-bottom: 1rem;">
+                    <label class="text-bold mb-0.5">🕐 Hora Desejada:</label>
+                    <input type="time" id="proposalTime${explanationId}" class="input-field" required>
+                </div>
+                
+                <div style="margin-bottom: 1rem;">
+                    <label class="text-bold mb-0.5">⏱️ Duração:</label>
+                    <select id="proposalDuration${explanationId}" class="select-field">
+                        <option value="30">30 minutos</option>
+                        <option value="60" selected>1 hora</option>
+                        <option value="90">1 hora e 30 minutos</option>
+                        <option value="120">2 horas</option>
+                    </select>
+                </div>
+                
+                <div style="margin-bottom: 1rem;">
+                    <label class="text-bold mb-0.5">💰 Preço Proposto (€/hora):</label>
+                    <input type="number" id="proposalPrice${explanationId}" class="input-field" 
+                           value="${basePrice}" min="1" step="0.50" placeholder="Ex: 15.00">
+                    <p class="text-small text-grey mt-0.5">Ou deixe o preço sugerido pelo tutor</p>
+                </div>
+                
+                <div style="margin-bottom: 1rem;">
+                    <label class="text-bold mb-0.5">📝 Assunto/Tópico:</label>
+                    <input type="text" id="proposalTopic${explanationId}" class="input-field" placeholder="Ex: Equações do 2º grau, Fotosíntese, etc.">
+                </div>
+                
+                <div style="margin-bottom: 1rem;">
+                    <label class="text-bold mb-0.5">💬 Mensagem:</label>
+                    <textarea id="proposalMessage${explanationId}" class="input-field" 
+                              placeholder="Explique o que precisa e qualquer requisito especial..." 
+                              style="height: 100px; resize: vertical;" required></textarea>
+                </div>
+                
+                <div style="display: flex; gap: 0.5rem;">
+                    <button class="btn btn-orange" style="flex: 1;" onclick="submitProposal(${explanationId})">
+                        📤 Enviar Proposta
+                    </button>
+                    <button class="btn btn-grey" style="flex: 1;" onclick="closeModal()">
+                        ✖️ Cancelar
+                    </button>
+                </div>
+            `;
+            
+            showModal(createModal('Enviar Proposta', modalContent));
+        }
+        
+        function submitProposal(explanationId) {
+            const explanation = mockData.explanations.find(e => e.id === explanationId);
+            if (!explanation) return;
+            
+            const date = document.getElementById(`proposalDate${explanationId}`)?.value;
+            const time = document.getElementById(`proposalTime${explanationId}`)?.value;
+            const duration = document.getElementById(`proposalDuration${explanationId}`)?.value;
+            const price = document.getElementById(`proposalPrice${explanationId}`)?.value;
+            const topic = document.getElementById(`proposalTopic${explanationId}`)?.value;
+            const message = document.getElementById(`proposalMessage${explanationId}`)?.value;
+            
+            if (!date || !time || !message || !price) {
+                showNotification('Campos Obrigatórios', 'Por favor, preencha todos os campos obrigatórios.', 'error');
+                return;
+            }
+            
+            if (!window.explanationBookings) window.explanationBookings = { bookings: [], proposals: [] };
+            if (!window.explanationBookings.proposals) window.explanationBookings.proposals = [];
+            
+            const proposal = {
+                id: Date.now(),
+                explanationId: explanationId,
+                explanationSubject: explanation.subject,
+                tutor: explanation.tutor,
+                tutorId: explanation.tutorId,
+                studentId: currentUser.id,
+                studentName: currentUser.name,
+                date: date,
+                time: time,
+                duration: parseInt(duration),
+                proposedPrice: parseFloat(price),
+                originalPrice: explanation.price,
+                topic: topic || '',
+                message: message,
+                status: 'pending', // pending, accepted, rejected, counter-proposed
+                createdAt: new Date().toISOString()
+            };
+            
+            window.explanationBookings.proposals.push(proposal);
+            saveBookings();
+            
+            closeModal();
+            showNotification('Proposta Enviada', `A sua proposta foi enviada para ${explanation.tutor}. Aguarde resposta.`, 'success');
+            
+            // Add points
+            addPoints(3, 'Enviou uma proposta de explicação');
+        }
+        
         // === FAVORITES SYSTEM ===
         
         function isProductFavorite(id) {
@@ -7980,9 +8181,9 @@
         }
         
         function renderCartPage() {
-            const cart = window.shoppingCart || { products: [], explanations: [] };
+            const cart = window.shoppingCart || { products: [] };
             const totals = calculateCartTotal();
-            const hasItems = (cart.products?.length || 0) + (cart.explanations?.length || 0) > 0;
+            const hasItems = (cart.products?.length || 0) > 0;
             
             return `
                 <div class="page-header">
@@ -7993,7 +8194,7 @@
                     <div class="card text-center">
                         <div style="font-size: 4rem; margin-bottom: 1rem;">🛒</div>
                         <h3 class="text-bold mb-1">O seu carrinho está vazio</h3>
-                        <p class="text-grey mb-2">Adicione produtos e explicações ao carrinho para continuar!</p>
+                        <p class="text-grey mb-2">Adicione produtos ao carrinho para continuar!</p>
                         <button class="btn btn-primary" onclick="navigateTo('loja')">
                             🛍️ Continuar a Comprar
                         </button>
@@ -8022,41 +8223,14 @@
                             </div>
                             <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--color-border);">
                                 <div style="display: flex; justify-content: space-between; align-items: center;">
-                                    <strong>Subtotal Produtos:</strong>
-                                    <span style="font-size: 1.2rem; font-weight: bold; color: var(--color-red);">${totals.products.toFixed(2)}€</span>
+                                    <strong>Total:</strong>
+                                    <span style="font-size: 1.2rem; font-weight: bold; color: var(--color-red);">${totals.total.toFixed(2)}€</span>
                                 </div>
                             </div>
                         ` : '<p class="text-grey text-center">Nenhum produto no carrinho.</p>'}
                     </div>
                     
-                    <div class="card">
-                        <h3 class="text-bold mb-2">📚 Explicações (${cart.explanations?.length || 0})</h3>
-                        ${cart.explanations && cart.explanations.length > 0 ? `
-                            <div style="display: flex; flex-direction: column; gap: 1rem;">
-                                ${cart.explanations.map(explanation => `
-                                    <div style="display: flex; gap: 1rem; padding: 1rem; background: var(--color-bg-secondary); border-radius: 10px; align-items: center;">
-                                        <div style="width: 80px; height: 80px; background: var(--color-purple); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: white;">📚</div>
-                                        <div style="flex: 1;">
-                                            <h4 class="text-bold mb-0.5">${explanation.subject}</h4>
-                                            <p class="text-small text-grey mb-0.5">${explanation.level} • Tutor: ${explanation.tutor}</p>
-                                            <p class="text-bold" style="color: var(--color-purple); font-size: 1.1rem;">${explanation.price}</p>
-                                        </div>
-                                        <button class="btn btn-red" style="padding: 0.5rem;" onclick="removeExplanationFromCart(${explanation.id})" aria-label="Remover do carrinho">
-                                            🗑️
-                                        </button>
-                                    </div>
-                                `).join('')}
-                            </div>
-                            <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--color-border);">
-                                <div style="display: flex; justify-content: space-between; align-items: center;">
-                                    <strong>Subtotal Explicações:</strong>
-                                    <span style="font-size: 1.2rem; font-weight: bold; color: var(--color-purple);">${totals.explanations.toFixed(2)}€</span>
-                                </div>
-                            </div>
-                        ` : '<p class="text-grey text-center">Nenhuma explicação no carrinho.</p>'}
-                    </div>
-                    
-                    <div class="card" style="background: linear-gradient(135deg, var(--color-blue-dark), var(--color-purple)); color: white;">
+                    <div class="card" style="background: linear-gradient(135deg, var(--color-blue-dark), var(--color-red)); color: white;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                             <h3 class="text-bold" style="color: white;">Total:</h3>
                             <span style="font-size: 1.8rem; font-weight: bold;">${totals.total.toFixed(2)}€</span>
@@ -8073,12 +8247,321 @@
             `;
         }
         
+        function renderMyExplanationsPage() {
+            if (!window.explanationBookings) window.explanationBookings = { bookings: [], proposals: [] };
+            
+            const bookings = window.explanationBookings.bookings || [];
+            const proposals = window.explanationBookings.proposals || [];
+            
+            // Filter by current user
+            const myBookings = bookings.filter(b => b.studentId === currentUser.id);
+            const myProposals = proposals.filter(p => p.studentId === currentUser.id);
+            
+            // For tutors: bookings and proposals received
+            const receivedBookings = bookings.filter(b => b.tutorId === currentUser.id);
+            const receivedProposals = proposals.filter(p => p.tutorId === currentUser.id);
+            
+            const currentTab = window.myExplanationsTab || 'myBookings';
+            
+            return `
+                <div class="page-header">
+                    <h2>📖 Minhas Explicações</h2>
+                </div>
+                
+                <!-- Tabs -->
+                <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem; border-bottom: 2px solid var(--color-border-light);">
+                    <button class="btn ${currentTab === 'myBookings' ? 'btn-purple' : 'btn-grey'}" 
+                            onclick="switchMyExplanationsTab('myBookings')" 
+                            style="flex: 1; border-radius: 0; border-bottom: ${currentTab === 'myBookings' ? '3px solid var(--color-purple)' : 'none'};">
+                        📅 Meus Agendamentos (${myBookings.length})
+                    </button>
+                    <button class="btn ${currentTab === 'myProposals' ? 'btn-orange' : 'btn-grey'}" 
+                            onclick="switchMyExplanationsTab('myProposals')" 
+                            style="flex: 1; border-radius: 0; border-bottom: ${currentTab === 'myProposals' ? '3px solid var(--color-orange)' : 'none'};">
+                        💼 Minhas Propostas (${myProposals.length})
+                    </button>
+                    ${receivedBookings.length > 0 || receivedProposals.length > 0 ? `
+                        <button class="btn ${currentTab === 'received' ? 'btn-blue' : 'btn-grey'}" 
+                                onclick="switchMyExplanationsTab('received')" 
+                                style="flex: 1; border-radius: 0; border-bottom: ${currentTab === 'received' ? '3px solid var(--color-blue)' : 'none'};">
+                            📥 Recebidos (${receivedBookings.length + receivedProposals.length})
+                        </button>
+                    ` : ''}
+                </div>
+                
+                ${currentTab === 'myBookings' ? `
+                    <div class="card">
+                        <h3 class="text-bold mb-2">📅 Agendamentos Enviados</h3>
+                        ${myBookings.length > 0 ? `
+                            <div style="display: flex; flex-direction: column; gap: 1rem;">
+                                ${myBookings.map(booking => `
+                                    <div style="padding: 1rem; background: var(--color-bg-secondary); border-radius: 10px; border-left: 4px solid ${
+                                        booking.status === 'confirmed' ? 'var(--color-success)' :
+                                        booking.status === 'rejected' ? 'var(--color-error)' :
+                                        booking.status === 'completed' ? 'var(--color-blue)' :
+                                        booking.status === 'cancelled' ? 'var(--color-grey)' :
+                                        'var(--color-orange)'
+                                    };">
+                                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+                                            <div style="flex: 1;">
+                                                <h4 class="text-bold mb-0.5">${booking.explanationSubject}</h4>
+                                                <p class="text-small text-grey mb-0.5">Tutor: ${booking.tutor}</p>
+                                                <p class="text-small mb-0.5">
+                                                    📅 ${new Date(booking.date).toLocaleDateString('pt-PT')} 
+                                                    🕐 ${booking.time} 
+                                                    ⏱️ ${booking.duration} min
+                                                </p>
+                                                ${booking.topic ? `<p class="text-small mb-0.5"><strong>Assunto:</strong> ${booking.topic}</p>` : ''}
+                                                ${booking.message ? `<p class="text-small text-grey mb-0.5">${booking.message}</p>` : ''}
+                                            </div>
+                                            <span class="text-small" style="padding: 0.25rem 0.5rem; background: var(--color-surface); border-radius: 5px; white-space: nowrap;">
+                                                ${booking.status === 'pending' ? '⏳ Pendente' :
+                                                  booking.status === 'confirmed' ? '✅ Confirmado' :
+                                                  booking.status === 'rejected' ? '❌ Rejeitado' :
+                                                  booking.status === 'completed' ? '✓ Concluído' :
+                                                  booking.status === 'cancelled' ? '🚫 Cancelado' : booking.status}
+                                            </span>
+                                        </div>
+                                        ${booking.status === 'pending' ? `
+                                            <button class="btn btn-red" style="width: 100%; margin-top: 0.5rem; padding: 0.4rem;" onclick="cancelBooking(${booking.id})">
+                                                🚫 Cancelar Agendamento
+                                            </button>
+                                        ` : ''}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : `
+                            <div class="text-center" style="padding: 2rem;">
+                                <div style="font-size: 3rem; margin-bottom: 1rem;">📅</div>
+                                <p class="text-grey">Ainda não tem agendamentos.</p>
+                                <button class="btn btn-purple" onclick="navigateTo('loja')" style="margin-top: 1rem;">
+                                    📚 Procurar Explicações
+                                </button>
+                            </div>
+                        `}
+                    </div>
+                ` : currentTab === 'myProposals' ? `
+                    <div class="card">
+                        <h3 class="text-bold mb-2">💼 Propostas Enviadas</h3>
+                        ${myProposals.length > 0 ? `
+                            <div style="display: flex; flex-direction: column; gap: 1rem;">
+                                ${myProposals.map(proposal => `
+                                    <div style="padding: 1rem; background: var(--color-bg-secondary); border-radius: 10px; border-left: 4px solid ${
+                                        proposal.status === 'accepted' ? 'var(--color-success)' :
+                                        proposal.status === 'rejected' ? 'var(--color-error)' :
+                                        proposal.status === 'counter-proposed' ? 'var(--color-orange)' :
+                                        'var(--color-orange)'
+                                    };">
+                                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+                                            <div style="flex: 1;">
+                                                <h4 class="text-bold mb-0.5">${proposal.explanationSubject}</h4>
+                                                <p class="text-small text-grey mb-0.5">Tutor: ${proposal.tutor}</p>
+                                                <p class="text-small mb-0.5">
+                                                    📅 ${new Date(proposal.date).toLocaleDateString('pt-PT')} 
+                                                    🕐 ${proposal.time} 
+                                                    ⏱️ ${proposal.duration} min
+                                                </p>
+                                                <p class="text-small mb-0.5">
+                                                    💰 Preço proposto: <strong>${proposal.proposedPrice.toFixed(2)}€/hora</strong>
+                                                    ${proposal.proposedPrice !== parseFloat(proposal.originalPrice.toString().replace(/[^\d,.]/g, '').replace(',', '.')) ? 
+                                                        `(Original: ${proposal.originalPrice})` : ''}
+                                                </p>
+                                                ${proposal.topic ? `<p class="text-small mb-0.5"><strong>Assunto:</strong> ${proposal.topic}</p>` : ''}
+                                                <p class="text-small text-grey mb-0.5">${proposal.message}</p>
+                                            </div>
+                                            <span class="text-small" style="padding: 0.25rem 0.5rem; background: var(--color-surface); border-radius: 5px; white-space: nowrap;">
+                                                ${proposal.status === 'pending' ? '⏳ Pendente' :
+                                                  proposal.status === 'accepted' ? '✅ Aceite' :
+                                                  proposal.status === 'rejected' ? '❌ Rejeitada' :
+                                                  proposal.status === 'counter-proposed' ? '💬 Contraproposta' : proposal.status}
+                                            </span>
+                                        </div>
+                                        ${proposal.status === 'pending' ? `
+                                            <button class="btn btn-red" style="width: 100%; margin-top: 0.5rem; padding: 0.4rem;" onclick="cancelProposal(${proposal.id})">
+                                                🚫 Cancelar Proposta
+                                            </button>
+                                        ` : ''}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : `
+                            <div class="text-center" style="padding: 2rem;">
+                                <div style="font-size: 3rem; margin-bottom: 1rem;">💼</div>
+                                <p class="text-grey">Ainda não enviou propostas.</p>
+                                <button class="btn btn-orange" onclick="navigateTo('loja')" style="margin-top: 1rem;">
+                                    📚 Procurar Explicações
+                                </button>
+                            </div>
+                        `}
+                    </div>
+                ` : `
+                    <div class="card">
+                        <h3 class="text-bold mb-2">📥 Agendamentos Recebidos</h3>
+                        ${receivedBookings.length > 0 ? `
+                            <div style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 2rem;">
+                                ${receivedBookings.map(booking => `
+                                    <div style="padding: 1rem; background: var(--color-bg-secondary); border-radius: 10px; border-left: 4px solid ${
+                                        booking.status === 'confirmed' ? 'var(--color-success)' :
+                                        booking.status === 'rejected' ? 'var(--color-error)' :
+                                        'var(--color-orange)'
+                                    };">
+                                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+                                            <div style="flex: 1;">
+                                                <h4 class="text-bold mb-0.5">${booking.explanationSubject}</h4>
+                                                <p class="text-small text-grey mb-0.5">Aluno: ${booking.studentName}</p>
+                                                <p class="text-small mb-0.5">
+                                                    📅 ${new Date(booking.date).toLocaleDateString('pt-PT')} 
+                                                    🕐 ${booking.time} 
+                                                    ⏱️ ${booking.duration} min
+                                                </p>
+                                                ${booking.topic ? `<p class="text-small mb-0.5"><strong>Assunto:</strong> ${booking.topic}</p>` : ''}
+                                                ${booking.message ? `<p class="text-small text-grey mb-0.5">${booking.message}</p>` : ''}
+                                            </div>
+                                            <span class="text-small" style="padding: 0.25rem 0.5rem; background: var(--color-surface); border-radius: 5px; white-space: nowrap;">
+                                                ${booking.status === 'pending' ? '⏳ Pendente' :
+                                                  booking.status === 'confirmed' ? '✅ Confirmado' :
+                                                  booking.status === 'rejected' ? '❌ Rejeitado' : booking.status}
+                                            </span>
+                                        </div>
+                                        ${booking.status === 'pending' ? `
+                                            <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+                                                <button class="btn btn-success" style="flex: 1; padding: 0.4rem;" onclick="respondToBooking(${booking.id}, 'confirmed')">
+                                                    ✅ Confirmar
+                                                </button>
+                                                <button class="btn btn-red" style="flex: 1; padding: 0.4rem;" onclick="respondToBooking(${booking.id}, 'rejected')">
+                                                    ❌ Rejeitar
+                                                </button>
+                                            </div>
+                                        ` : ''}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : '<p class="text-grey text-center">Nenhum agendamento recebido.</p>'}
+                        
+                        <h3 class="text-bold mb-2 mt-2">💼 Propostas Recebidas</h3>
+                        ${receivedProposals.length > 0 ? `
+                            <div style="display: flex; flex-direction: column; gap: 1rem;">
+                                ${receivedProposals.map(proposal => `
+                                    <div style="padding: 1rem; background: var(--color-bg-secondary); border-radius: 10px; border-left: 4px solid ${
+                                        proposal.status === 'accepted' ? 'var(--color-success)' :
+                                        proposal.status === 'rejected' ? 'var(--color-error)' :
+                                        'var(--color-orange)'
+                                    };">
+                                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+                                            <div style="flex: 1;">
+                                                <h4 class="text-bold mb-0.5">${proposal.explanationSubject}</h4>
+                                                <p class="text-small text-grey mb-0.5">Aluno: ${proposal.studentName}</p>
+                                                <p class="text-small mb-0.5">
+                                                    📅 ${new Date(proposal.date).toLocaleDateString('pt-PT')} 
+                                                    🕐 ${proposal.time} 
+                                                    ⏱️ ${proposal.duration} min
+                                                </p>
+                                                <p class="text-small mb-0.5">
+                                                    💰 Preço proposto: <strong>${proposal.proposedPrice.toFixed(2)}€/hora</strong>
+                                                    ${proposal.proposedPrice !== parseFloat(proposal.originalPrice.toString().replace(/[^\d,.]/g, '').replace(',', '.')) ? 
+                                                        `(Original: ${proposal.originalPrice})` : ''}
+                                                </p>
+                                                ${proposal.topic ? `<p class="text-small mb-0.5"><strong>Assunto:</strong> ${proposal.topic}</p>` : ''}
+                                                <p class="text-small text-grey mb-0.5">${proposal.message}</p>
+                                            </div>
+                                            <span class="text-small" style="padding: 0.25rem 0.5rem; background: var(--color-surface); border-radius: 5px; white-space: nowrap;">
+                                                ${proposal.status === 'pending' ? '⏳ Pendente' :
+                                                  proposal.status === 'accepted' ? '✅ Aceite' :
+                                                  proposal.status === 'rejected' ? '❌ Rejeitada' : proposal.status}
+                                            </span>
+                                        </div>
+                                        ${proposal.status === 'pending' ? `
+                                            <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+                                                <button class="btn btn-success" style="flex: 1; padding: 0.4rem;" onclick="respondToProposal(${proposal.id}, 'accepted')">
+                                                    ✅ Aceitar
+                                                </button>
+                                                <button class="btn btn-red" style="flex: 1; padding: 0.4rem;" onclick="respondToProposal(${proposal.id}, 'rejected')">
+                                                    ❌ Rejeitar
+                                                </button>
+                                            </div>
+                                        ` : ''}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : '<p class="text-grey text-center">Nenhuma proposta recebida.</p>'}
+                    </div>
+                `}
+            `;
+        }
+        
+        function switchMyExplanationsTab(tab) {
+            window.myExplanationsTab = tab;
+            renderPage();
+        }
+        
+        function cancelBooking(bookingId) {
+            if (!confirm('Tem a certeza que deseja cancelar este agendamento?')) return;
+            
+            const booking = window.explanationBookings.bookings.find(b => b.id === bookingId);
+            if (booking && booking.status === 'pending') {
+                booking.status = 'cancelled';
+                saveBookings();
+                renderPage();
+                showNotification('Agendamento Cancelado', 'O agendamento foi cancelado com sucesso.', 'info');
+            }
+        }
+        
+        function cancelProposal(proposalId) {
+            if (!confirm('Tem a certeza que deseja cancelar esta proposta?')) return;
+            
+            const proposal = window.explanationBookings.proposals.find(p => p.id === proposalId);
+            if (proposal && proposal.status === 'pending') {
+                proposal.status = 'cancelled';
+                saveBookings();
+                renderPage();
+                showNotification('Proposta Cancelada', 'A proposta foi cancelada com sucesso.', 'info');
+            }
+        }
+        
+        function respondToBooking(bookingId, response) {
+            const booking = window.explanationBookings.bookings.find(b => b.id === bookingId);
+            if (!booking) return;
+            
+            booking.status = response;
+            saveBookings();
+            renderPage();
+            
+            const message = response === 'confirmed' ? 
+                `Agendamento confirmado! O aluno ${booking.studentName} foi notificado.` :
+                `Agendamento rejeitado. O aluno ${booking.studentName} foi notificado.`;
+            
+            showNotification(
+                response === 'confirmed' ? 'Agendamento Confirmado' : 'Agendamento Rejeitado',
+                message,
+                response === 'confirmed' ? 'success' : 'info'
+            );
+        }
+        
+        function respondToProposal(proposalId, response) {
+            const proposal = window.explanationBookings.proposals.find(p => p.id === proposalId);
+            if (!proposal) return;
+            
+            proposal.status = response;
+            saveBookings();
+            renderPage();
+            
+            const message = response === 'accepted' ? 
+                `Proposta aceite! O aluno ${proposal.studentName} foi notificado.` :
+                `Proposta rejeitada. O aluno ${proposal.studentName} foi notificado.`;
+            
+            showNotification(
+                response === 'accepted' ? 'Proposta Aceite' : 'Proposta Rejeitada',
+                message,
+                response === 'accepted' ? 'success' : 'info'
+            );
+        }
+        
         function checkout() {
-            const cart = window.shoppingCart || { products: [], explanations: [] };
+            const cart = window.shoppingCart || { products: [] };
             const totals = calculateCartTotal();
             
             if (totals.total === 0) {
-                showNotification('Carrinho Vazio', 'Adicione itens ao carrinho antes de finalizar a compra.', 'info');
+                showNotification('Carrinho Vazio', 'Adicione produtos ao carrinho antes de finalizar a compra.', 'info');
                 return;
             }
             
@@ -8093,8 +8576,7 @@
                 <div style="text-align: left; margin-bottom: 1.5rem;">
                     <h4 class="text-bold mb-1">Resumo da Compra:</h4>
                     <div style="background: var(--color-bg-secondary); padding: 1rem; border-radius: 8px;">
-                        <p class="mb-0.5"><strong>Produtos:</strong> ${cart.products?.length || 0} item(s) - ${totals.products.toFixed(2)}€</p>
-                        <p class="mb-0.5"><strong>Explicações:</strong> ${cart.explanations?.length || 0} item(s) - ${totals.explanations.toFixed(2)}€</p>
+                        <p class="mb-0.5"><strong>Produtos:</strong> ${cart.products?.length || 0} item(s) - ${totals.total.toFixed(2)}€</p>
                         <div style="margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid var(--color-border);">
                             <p class="mb-0"><strong>Total:</strong> ${totals.total.toFixed(2)}€</p>
                         </div>
@@ -8125,7 +8607,7 @@
         }
         
         function confirmCheckout() {
-            const cart = window.shoppingCart || { products: [], explanations: [] };
+            const cart = window.shoppingCart || { products: [] };
             const paymentMethod = document.getElementById('paymentMethod')?.value || 'card';
             const totals = calculateCartTotal();
             
@@ -8143,15 +8625,10 @@
                 });
             });
             
-            // Add explanations to history
-            cart.explanations?.forEach(explanation => {
-                // Could add to a separate explanations history if needed
-            });
-            
             saveHistory();
             
-            // Clear cart
-            window.shoppingCart = { products: [], explanations: [] };
+            // Clear cart (only products now)
+            window.shoppingCart = { products: [] };
             saveCart();
             
             // Update cart icon immediately
