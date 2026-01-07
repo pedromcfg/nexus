@@ -4886,6 +4886,7 @@
                     <button class="btn btn-grey" style="flex: 1;" onclick="contactTutor(${id})">
                         💬 Contactar
                     </button>
+                </div>
                 <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
                     <button class="btn" id="favoriteExplanationBtn${id}" style="flex: 1;" onclick="toggleFavoriteExplanation(${id})">
                         🤍 Adicionar aos Favoritos
@@ -5769,7 +5770,12 @@
         // Resources Page
         function renderResourcesPage() {
             return `
-                <h2 class="text-center mb-3">Recursos Educativos</h2>
+                <div class="page-header">
+                    <h2>Recursos Educativos</h2>
+                    <button class="btn btn-primary" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;" onclick="addResource()">
+                        ➕ Adicionar Recurso
+                    </button>
+                </div>
                 
                 <div class="grid">
                     ${mockData.resources.map(resource => `
@@ -5837,12 +5843,87 @@
             showModal(createModal('Recurso Educativo', modalContent));
         }
         
+        function addResource() {
+            const modalContent = `
+                <h4 class="text-bold mb-2">Adicionar Recurso</h4>
+                
+                <input type="text" id="newResourceTitle" class="input-field" placeholder="Título do recurso">
+                <input type="text" id="newResourceSubject" class="input-field" placeholder="Disciplina / Área">
+                <input type="text" id="newResourceAuthor" class="input-field" placeholder="Autor (opcional)">
+                
+                <select id="newResourceType" class="select-field">
+                    <option value="">Tipo de recurso</option>
+                    <option value="PDF">📄 PDF</option>
+                    <option value="Vídeo">🎬 Vídeo</option>
+                    <option value="Apresentação">📊 Apresentação</option>
+                    <option value="Link">🔗 Link</option>
+                    <option value="Outro">📁 Outro</option>
+                </select>
+                
+                <input type="text" id="newResourceSize" class="input-field" placeholder="Tamanho (ex: 2MB, 10 páginas) (opcional)">
+                
+                <textarea id="newResourceTags" class="input-field" placeholder="Tags (separadas por vírgulas, ex: matemática, equações, 10º ano)" style="height: 80px; resize: vertical;"></textarea>
+                
+                <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+                    <button class="btn btn-primary" style="flex: 1;" onclick="publishResource()">
+                        📤 Publicar Recurso
+                    </button>
+                    <button class="btn btn-grey" style="flex: 1;" onclick="closeModal()">
+                        ✖️ Cancelar
+                    </button>
+                </div>
+            `;
+            
+            showModal(createModal('Novo Recurso', modalContent));
+        }
+        
+        function publishResource() {
+            const title = document.getElementById('newResourceTitle')?.value.trim();
+            const subject = document.getElementById('newResourceSubject')?.value.trim();
+            const author = document.getElementById('newResourceAuthor')?.value.trim() || currentUser.name;
+            const type = document.getElementById('newResourceType')?.value;
+            const size = document.getElementById('newResourceSize')?.value.trim() || 'N/A';
+            const tagsInput = document.getElementById('newResourceTags')?.value.trim();
+            
+            if (!title || !subject || !type) {
+                showNotification('Campos Obrigatórios', 'Preencha pelo menos título, disciplina e tipo de recurso.', 'error');
+                return;
+            }
+            
+            const tags = tagsInput ? tagsInput.split(',').map(t => t.trim()).filter(Boolean) : [];
+            
+            const newResource = {
+                id: Date.now(),
+                title,
+                subject,
+                author,
+                type,
+                size,
+                downloads: 0,
+                rating: null,
+                tags,
+                date: new Date().toISOString()
+            };
+            
+            mockData.resources.push(newResource);
+            // Não há função específica de saveResources, mas podemos reutilizar localStorage genérico se existir no futuro
+            
+            closeModal();
+            renderPage();
+            showNotification('Recurso Adicionado', 'O recurso foi adicionado à lista de recursos educativos.', 'success');
+        }
+        
         // Agenda Page
         function renderAgendaPage() {
             const sortedAgenda = mockData.agenda.sort((a, b) => new Date(a.date) - new Date(b.date));
             
             return `
-                <h2 class="text-center mb-3">Agenda</h2>
+                <div class="page-header">
+                    <h2>Agenda</h2>
+                    <button class="btn btn-primary" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;" onclick="addAgendaItem()">
+                        ➕ Adicionar Evento / Lembrete
+                    </button>
+                </div>
                 
                 ${sortedAgenda.map(item => {
                     const priorityColors = {
@@ -5852,7 +5933,7 @@
                     };
                     
                     return `
-                        <div class="card">
+                        <div class="card" onclick="viewAgendaItem(${item.id})" style="cursor: pointer;">
                             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
                                 <span style="background: ${priorityColors[item.priority] || 'var(--color-blue-dark)'}; color: white; padding: 0.25rem 0.75rem; border-radius: 15px; font-size: 0.8rem;">${item.type}</span>
                                 <div style="text-align: right;">
@@ -5947,6 +6028,41 @@
                     });
                 }
             }, 100);
+        }
+        
+        function viewAgendaItem(id) {
+            const item = mockData.agenda.find(a => a.id === id);
+            if (!item) return;
+            
+            const priorityLabels = {
+                'high': 'Alta',
+                'medium': 'Média',
+                'low': 'Baixa'
+            };
+            
+            const modalContent = `
+                <div style="text-align: center; margin-bottom: 1.5rem;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">📅</div>
+                    <h3 class="text-bold mb-1">${item.title}</h3>
+                    <p class="text-grey text-small">
+                        ${formatDate(item.date)} • ${item.time || 'Sem hora definida'}
+                    </p>
+                </div>
+                
+                <div style="text-align: left; margin-bottom: 1.5rem;">
+                    <p class="mb-1"><strong>Tipo:</strong> ${item.type}</p>
+                    <p class="mb-1"><strong>Prioridade:</strong> ${priorityLabels[item.priority] || 'N/A'}</p>
+                    ${item.location ? `<p class="mb-1"><strong>Local:</strong> ${item.location}</p>` : ''}
+                    ${item.description ? `<p class="mb-1"><strong>Descrição:</strong> ${item.description}</p>` : ''}
+                    ${item.reminder ? '<p class="mb-1">🔔 Lembrete ativo para este evento.</p>' : '<p class="mb-1 text-grey">Sem lembrete ativo.</p>'}
+                </div>
+                
+                <button class="btn btn-grey" style="width: 100%;" onclick="closeModal()">
+                    ✖️ Fechar
+                </button>
+            `;
+            
+            showModal(createModal('Detalhes da Agenda', modalContent));
         }
         
         let reminderEnabled = false;
